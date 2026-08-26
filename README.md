@@ -6,12 +6,10 @@ Vista previa 3D de asientos para plataformas de boletaje: los usuarios exploran 
 
 | Rol | Integrante |
 |---|---|
-| Product Owner | Por definir |
-| Scrum Master | Por definir |
-| Frontend | Por definir |
-| Backend | Por definir |
-| QA | Por definir |
-| DB / DevOps | Por definir |
+| Product Owner | Javier Polanco |
+| Scrum Master | Saúl Arévalo |
+| Desarroladores| Alejandro González, José Mendoza, Manuel Berrios, Jorge Polanco, Saúl Arévalo, Javier Polanco |
+
 
 Duracion de cada Sprint: 2 semanas.
 
