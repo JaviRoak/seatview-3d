@@ -2,18 +2,16 @@
 
 Vista previa 3D de asientos para plataformas de boletaje: los usuarios exploran un recinto generado proceduralmente y ven, desde el asiento que elijan, como se veria el evento antes de comprar su entrada.
 
-Nota: inspirado conceptualmente en thebuggeddev/football-stadium (https://github.com/thebuggeddev/football-stadium), licencia PolyForm Noncommercial 1.0.0. No se reutiliza codigo ni activos de ese repositorio; SeatView 3D es una implementacion propia y original del equipo.
-
 ## Equipo Scrum
 
 | Rol | Integrante |
 |---|---|
-| Product Owner | (completar) |
-| Scrum Master | (completar) |
-| Frontend | (completar) |
-| Backend | (completar) |
-| QA | (completar) |
-| DB / DevOps | Javier |
+| Product Owner | Por definir |
+| Scrum Master | Por definir |
+| Frontend | Por definir |
+| Backend | Por definir |
+| QA | Por definir |
+| DB / DevOps | Por definir |
 
 Duracion de cada Sprint: 2 semanas.
 
