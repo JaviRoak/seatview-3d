@@ -4,7 +4,7 @@ Vista previa 3D de asientos para plataformas de boletaje: los usuarios exploran 
 
 ## Equipo Scrum
 
-| Rol | Integrante |
+| Rol | Nombre |
 |---|---|
 | Product Owner | Javier Polanco |
 | Scrum Master | Saúl Arévalo |
