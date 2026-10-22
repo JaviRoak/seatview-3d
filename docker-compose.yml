@@ -1,0 +1,35 @@
+# Servicios de desarrollo local de SeatView 3D.
+# Levantar con:  docker compose up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: seatview-postgres
+    environment:
+      POSTGRES_USER: seatview
+      POSTGRES_PASSWORD: seatview
+      POSTGRES_DB: seatview
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seatview"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: seatview-redis
+    # notify-keyspace-events Ex => notificaciones de expiración (ver docs/concurrencia.md)
+    command: ["redis-server", "--notify-keyspace-events", "Ex"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
