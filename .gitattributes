@@ -1,0 +1,8 @@
+# Finales de línea LF en el repositorio (el equipo trabaja en Windows y macOS)
+* text=auto eol=lf
+
+# Binarios
+*.glb binary
+*.png binary
+*.jpg binary
+*.webp binary
