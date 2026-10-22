@@ -54,28 +54,22 @@ Backlog inicial, alineado a los objetivos especificos reestructurados:
 
 ## Sprints
 
-| Sprint | Fechas | Objetivo | Estado |
+| Sprint | Fase | Objetivo | Estado |
 |---|---|---|---|
-| Sprint 0 | 25 ago 2026 - 18 oct 2026 | Definicion del equipo, stack, backlog inicial, diagramas UML y DER | Completado |
-| Sprint 1 | 19 oct 2026 - 1 nov 2026 | Base del proyecto: escena 3D con recinto procedural y API con esquema de datos | En curso |
-| Sprint 2 | 2 nov 2026 - 15 nov 2026 | Interaccion 3D: raycasting, seleccion de asiento y vista desde el asiento | Planeado |
-| Sprint 3 | 16 nov 2026 - 29 nov 2026 | Concurrencia: bloqueo temporal en Redis y difusion por WebSockets | Planeado |
-| Sprint 4 | 30 nov 2026 - 13 dic 2026 | Checkout simulado, autenticacion JWT y pruebas de rendimiento | Planeado |
+| Sprint 1 | Planeacion | Definicion del equipo, stack tecnologico, epicas e historias de usuario | Completado |
+| Sprint 2 | Diseño | Diagramas UML, modelo de datos (DER) y arquitectura del sistema | Completado |
+| Sprint 3 | Implementacion | Base del proyecto: escena 3D, modelo de datos, migraciones y autenticacion (19 oct - 1 nov 2026) | En curso |
 
-### Sprint 1: estado del tablero
+### Sprint 3: estado del tablero
 
-| Historia / tarea | Epica | Estado |
-|---|---|---|
-| Inicializar frontend con React + Vite + TypeScript | 1 | Completado |
-| Escena base en R3F con camara orbital, luces y escenario | 1 | Completado |
-| Generacion procedural de secciones, filas y asientos | 1 | Completado |
-| Renderizado de asientos con InstancedMesh (3,000 asientos en una draw call) | 2 | Completado |
-| Pruebas unitarias de la generacion del recinto (Vitest) | 4 | Completado |
-| Inicializar API Express + TypeScript con endpoint de salud | 1 | Completado |
-| Esquema Prisma inicial (Usuario, Recinto, Seccion, Asiento, Evento, Reserva) | 1 | En Revision (QA) |
-| Primera migracion y seed del recinto de prueba en PostgreSQL | 1 | En Progreso |
-| Endpoint GET /api/recintos/:id que devuelva la configuracion del recinto | 1 | Sprint Actual |
-| Consumir la configuracion del recinto desde el frontend | 1 | Sprint Actual |
+| Tarea | Historia / Epica | PR | Estado |
+|---|---|---|---|
+| Escena base en R3F con recinto procedural y asientos con InstancedMesh | Historia 1 (#5) | #12 | Completado |
+| API inicial Express + TypeScript | Epica 1 (#1) | #12 | Completado |
+| Monorepo con npm workspaces, Prisma 7 y docker-compose (PostgreSQL + Redis) | Epica 1 (#1) | #13 | En Revision (QA) |
+| Modelo de datos, migraciones y seed del estadio (~8,500 asientos) | Historia 7 (#11) | #14 | En Revision (QA) |
+| Nucleo del backend y autenticacion con JWT (registro, login, roles) | Historia 7 (#11) | #15 | En Revision (QA) |
+| Pruebas del backend (Vitest) | Epica 4 (#4) | - | Sprint Actual |
 
 ## Como levantar el proyecto localmente
 
