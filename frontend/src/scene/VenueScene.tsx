@@ -1,6 +1,12 @@
+import { useMemo } from 'react'
 import { OrbitControls } from '@react-three/drei'
+import { defaultVenue, generateVenue } from '../venue/generateVenue'
+import SeatInstances from './SeatInstances'
+import Stage from './Stage'
 
 export default function VenueScene() {
+  const seats = useMemo(() => generateVenue(defaultVenue), [])
+
   return (
     <>
       <color attach="background" args={['#0f1115']} />
@@ -12,8 +18,11 @@ export default function VenueScene() {
         <meshStandardMaterial color="#1b1e25" />
       </mesh>
 
+      <Stage />
+      <SeatInstances seats={seats} />
+
       <OrbitControls
-        target={[0, 0, 0]}
+        target={[0, 0, 15]}
         maxPolarAngle={Math.PI / 2.1}
         minDistance={10}
         maxDistance={150}
