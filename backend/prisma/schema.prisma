@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  nombre       String
+  passwordHash String
+  creadoEn     DateTime  @default(now())
+  reservas     Reserva[]
+}
+
+model Recinto {
+  id        String    @id @default(uuid())
+  nombre    String
+  ciudad    String
+  /// Parametros de generacion procedural (radio interior, profundidad y elevacion de fila)
+  config    Json
+  secciones Seccion[]
+  eventos   Evento[]
+}
+
+model Seccion {
+  id            String    @id @default(uuid())
+  recintoId     String
+  codigo        String
+  anguloCentral Float
+  apertura      Float
+  filas         Int
+  asientosFila  Int
+  precioBase    Decimal   @db.Decimal(10, 2)
+  recinto       Recinto   @relation(fields: [recintoId], references: [id], onDelete: Cascade)
+  asientos      Asiento[]
+
+  @@unique([recintoId, codigo])
+}
+
+model Asiento {
+  id        String    @id @default(uuid())
+  seccionId String
+  fila      Int
+  numero    Int
+  seccion   Seccion   @relation(fields: [seccionId], references: [id], onDelete: Cascade)
+  reservas  Reserva[]
+
+  @@unique([seccionId, fila, numero])
+}
+
+model Evento {
+  id        String    @id @default(uuid())
+  recintoId String
+  nombre    String
+  fecha     DateTime
+  recinto   Recinto   @relation(fields: [recintoId], references: [id])
+  reservas  Reserva[]
+}
+
+enum EstadoReserva {
+  PENDIENTE
+  PAGADA
+  CANCELADA
+}
+
+model Reserva {
+  id        String        @id @default(uuid())
+  usuarioId String
+  eventoId  String
+  asientoId String
+  estado    EstadoReserva @default(PENDIENTE)
+  creadaEn  DateTime      @default(now())
+  usuario   Usuario       @relation(fields: [usuarioId], references: [id])
+  evento    Evento        @relation(fields: [eventoId], references: [id])
+  asiento   Asiento       @relation(fields: [asientoId], references: [id])
+
+  @@unique([eventoId, asientoId])
+}
