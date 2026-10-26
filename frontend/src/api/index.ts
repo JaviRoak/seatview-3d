@@ -11,3 +11,9 @@ export const eventsApi = {
   get: (id: string) => api<{ event: EventDetail }>(`/events/${id}`),
   seats: (id: string) => api<EventSeatsPayload>(`/events/${id}/seats`),
 };
+export const locksApi = {
+  acquire: (eventId: string, eventSeatId: string) => api<{ eventSeatId: string; ttl: number; renewed: boolean }>('/locks', { method: 'POST', body: JSON.stringify({ eventId, eventSeatId }) }),
+  release: (eventId: string, eventSeatId: string) => api<{ released: boolean }>('/locks', { method: 'DELETE', body: JSON.stringify({ eventId, eventSeatId }) }),
+  extend: (eventId: string, eventSeatId: string) => api<{ eventSeatId: string; ttl: number }>('/locks/extend', { method: 'POST', body: JSON.stringify({ eventId, eventSeatId }) }),
+  mine: (eventId: string) => api<{ locks: Array<{ eventSeatId: string; ttl: number }> }>(`/locks/${eventId}`),
+};

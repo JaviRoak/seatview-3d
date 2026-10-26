@@ -1,11 +1,11 @@
 /**
- * Tarjeta del asiento en POV: insignia "Vista previa", sección,
+ * Tarjeta del asiento en POV (Cambio 1 y 3): insignia "Vista previa", sección,
  * FILA/ASIENTO/PRECIO, atributos derivados, calidad de vista, navegación entre
- * vecinos y el botón que marca el asiento como seleccionado (solo en el cliente;
- * el bloqueo en el servidor llega con el módulo de bloqueos).
+ * vecinos y el ÚNICO botón que aparta el asiento.
  */
 import type { EventDetail } from '../../api/types';
 import { useSeatsStore } from '../../store/seats';
+import { useAuthStore } from '../../store/auth';
 import { seatAttributes, viewQuality } from '../../scene/seatInsights';
 import { neighborSeat, type Direction } from '../../scene/seatNavigation';
 import {PreviewCard,PreviewNavigation} from './PreviewCard';
@@ -13,8 +13,8 @@ import {nearestInDirection} from '../../scene/previewNavigation';
 import {eventTargetXZ} from '../../scene/eventTarget';
 
 interface Props {
-  event: EventDetail; idx: number;
-  onSelect: (idx: number) => void; onDeselect: (idx: number) => void; onMove: (idx: number) => void; onExit: () => void;
+  event: EventDetail; idx: number; busy: boolean;
+  onReserve: (idx: number) => void; onRelease: (idx: number) => void; onMove: (idx: number) => void; onExit: () => void;
 }
 
 const ICONS = {
@@ -26,11 +26,13 @@ const ICONS = {
 };
 const CHECK = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 'auto', width: 16, height: 16 }}><path d="M5 12l5 5 9-10" /></svg>;
 
-export function SeatCard({ event, idx, onSelect, onDeselect, onMove, onExit }: Props) {
+export function SeatCard({ event, idx, busy, onReserve, onRelease, onMove, onExit }: Props) {
   const data = useSeatsStore((s) => s.data);
   const status = useSeatsStore((s) => s.status);
+  const lockedBy = useSeatsStore((s) => s.lockedBy);
   const selected = useSeatsStore((s) => s.selected);
   useSeatsStore((s) => s.version);
+  const user = useAuthStore((s) => s.user);
   if (!data) return null;
 
   const zone = data.zones[data.zoneIdx[idx]];
@@ -38,8 +40,8 @@ export function SeatCard({ event, idx, onSelect, onDeselect, onMove, onExit }: P
   const q = viewQuality(data, idx, event.venue.layout);
   const mixed=!!event.venue.layout.admission,concert=!!event.venue.layout.concert;
   const attrs = mixed ? [{icon:'front' as const,text:concert?'Vista hacia el escenario':'Vista hacia la cancha'},{icon:'center' as const,text:'Lugar numerado'}] : seatAttributes(data, idx, event.venue.layout, q);
-  const mine = selected.includes(idx);
-  const reason = status[idx] === 2 ? 'Este asiento ya fue vendido' : null;
+  const mine = selected.includes(idx) || (status[idx] === 1 && lockedBy.get(idx) === user?.id);
+  const reason = status[idx] === 2 ? 'Este asiento ya fue vendido' : status[idx] === 1 && !mine ? 'Otra persona lo está comprando ahora' : null;
   const can = (d: Direction) => concert ? nearestInDirection(
     [data.positions[idx*3],data.positions[idx*3+2]],
     Array.from({length:data.count},(_,i)=>({id:i,x:data.positions[i*3],z:data.positions[i*3+2]})).filter(p=>p.id!==idx&&data.zoneIdx[p.id]===data.zoneIdx[idx]&&data.rows[p.id]!=='GA'),d,eventTargetXZ(event.venue.layout)
@@ -54,7 +56,7 @@ export function SeatCard({ event, idx, onSelect, onDeselect, onMove, onExit }: P
       quality={!mixed&&<span className="quality" title={breakdown}>
           <span className="ring" style={{ background: ringColor }}>{q.percentile}</span>{q.label}
         </span>}
-      description={mixed?'Explora la vista desde este lugar antes de elegirlo.':<span title={breakdown}>
+      description={mixed?'Explora la vista desde este lugar antes de apartarlo.':<span title={breakdown}>
         Mejor que el {q.percentile}% de los asientos del recinto
         <span className="faint"> · cercanía {pct(q.D)} · alineación {pct(q.A)} · ángulo {pct(q.E)}</span>
       </span>}
@@ -65,9 +67,11 @@ export function SeatCard({ event, idx, onSelect, onDeselect, onMove, onExit }: P
         </ul>
       )}
       {mine ? (
-        <button className="btn-lg" onClick={() => onDeselect(idx)}>Quitar de mi selección</button>
+        <button className="btn-lg" disabled={busy} onClick={() => onRelease(idx)}>Quitar de mi reserva</button>
       ) : (
-        <button className="btn-primary btn-lg" disabled={!!reason} title={reason ?? undefined} onClick={() => onSelect(idx)}>Seleccionar este asiento</button>
+        <button className="btn-primary btn-lg" disabled={busy || !!reason} title={reason ?? undefined} onClick={() => onReserve(idx)}>
+          {busy ? 'Apartando…' : 'Apartar este asiento'}
+        </button>
       )}
       {reason && <p className="notice" style={{ margin: '0.4rem 0 0', textAlign: 'center' }}>{reason}</p>}
       <PreviewNavigation canMove={d=>neighbors[d]!==null} onMove={d=>{const n=neighbors[d];if(n!==null)onMove(n);}} onExit={onExit}/>
