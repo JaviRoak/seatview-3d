@@ -1,7 +1,8 @@
 /**
  * Visor 3D del evento (issue #5): carga el recinto y sus asientos desde la API
  * y los dibuja con SeatScene. Clic en un asiento = vista desde ese asiento (POV).
- * En esta etapa solo se explora: todavía no se aparta ni se compra.
+ * Desde la vista POV el asiento se puede marcar como seleccionado (solo en el
+ * cliente); todavía no se aparta en el servidor ni se compra.
  * La disponibilidad se mantiene al día por Socket.io (seats:update).
  * ?debug=1 muestra FPS; ?quality=low|high fuerza la calidad gráfica.
  */
@@ -16,6 +17,8 @@ import { consumeDragFlag, type PovTarget } from '../../scene/CameraController';
 import { FpsOverlay, type FpsSample } from '../../scene/FpsMeter';
 import { detectQuality } from '../../scene/quality';
 import { CATEGORY_LABEL } from '../../components/EventInfoCard';
+import { HelpPopover } from '../../components/HelpPopover';
+import { SeatCard } from './SeatCard';
 
 export function VisorPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -31,6 +34,7 @@ export function VisorPage() {
   const [hint, setHint] = useState(false);
   const [fps, setFps] = useState<FpsSample | null>(null);
   const data = useSeatsStore((s) => s.data);
+  const selected = useSeatsStore((s) => s.selected);
   const { connected } = useSeatSocket(eventId);
 
   useEffect(() => {
@@ -61,6 +65,8 @@ export function VisorPage() {
   }, []);
 
   const exitPov = useCallback(() => { setPov(null); setFocusIdx(null); setHint(false); useSeatsStore.getState().setFocused(null); }, []);
+  const select = useCallback((idx: number) => useSeatsStore.getState().select(idx, 0), []);
+  const deselect = useCallback((idx: number) => useSeatsStore.getState().deselect(idx), []);
   const onPovReady = useCallback(() => { setHint(true); window.setTimeout(() => setHint(false), 3500); }, []);
   const onHover = useCallback((idx: number | null, screen: { x: number; y: number } | null) => {
     setTooltip(idx === null || !screen ? null : { idx, x: screen.x, y: screen.y });
@@ -94,15 +100,29 @@ export function VisorPage() {
         {debug && <FpsOverlay sample={fps} seats={data?.count ?? 0} quality={quality} />}
       </div>
 
+      <div className="hud-bl">
+        <HelpPopover />
+      </div>
+
       <aside className="hud-tr">
-        {pov && focusIdx !== null && data ? (
-          <div className="card card-tight">
-            <p><strong>{seatLabel(data, focusIdx)}</strong></p>
-            <p>${data.zones[data.zoneIdx[focusIdx]]?.price.toFixed(2)} · calidad de vista {data.viewPct[focusIdx]}/100</p>
-            <button className="btn-ghost" onClick={exitPov}>Salir de la vista</button>
-          </div>
+        {pov && focusIdx !== null ? (
+          <SeatCard event={event} idx={focusIdx} onSelect={select} onDeselect={deselect} onMove={sitAt} onExit={exitPov} />
         ) : (
-          <div className="card card-tight notice">Pasa el cursor sobre un asiento para ver sus datos y haz clic para ver el evento desde ahí.</div>
+          <div className="card card-tight notice">Pasa el cursor sobre un asiento para ver sus datos y haz clic para sentarte en él. Desde ahí podrás seleccionarlo.</div>
+        )}
+        {data && selected.length > 0 && (
+          <div className="card">
+            <span className="eyebrow">Tu selección</span>
+            {selected.map((i) => (
+              <div key={i} className="seat-row">
+                <button className="btn-ghost" style={{ padding: 0, border: 0, textAlign: 'left' }} onClick={() => sitAt(i)} title="Ver desde este asiento">
+                  <span className="zone-chip" style={{ background: data.zones[data.zoneIdx[i]]?.color }} />{seatLabel(data, i)}
+                </button>
+                <span>${(data.zones[data.zoneIdx[i]]?.price ?? 0).toFixed(2)}</span>
+                <button className="btn-ghost btn-icon" onClick={() => deselect(i)} title="Quitar de la selección" aria-label="Quitar">×</button>
+              </div>
+            ))}
+          </div>
         )}
       </aside>
     </div>
