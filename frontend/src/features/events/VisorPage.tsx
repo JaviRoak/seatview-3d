@@ -2,6 +2,7 @@
  * Visor 3D del evento (issue #5): carga el recinto y sus asientos desde la API
  * y los dibuja con SeatScene. Clic en un asiento = vista desde ese asiento (POV).
  * En esta etapa solo se explora: todavía no se aparta ni se compra.
+ * La disponibilidad se mantiene al día por Socket.io (seats:update).
  * ?debug=1 muestra FPS; ?quality=low|high fuerza la calidad gráfica.
  */
 import { useCallback, useEffect, useState } from 'react';
@@ -9,6 +10,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { eventsApi } from '../../api';
 import type { EventDetail } from '../../api/types';
 import { seatLabel, useSeatsStore } from '../../store/seats';
+import { useSeatSocket } from '../../sockets/useSeatSocket';
 import { SeatScene } from '../../scene/SeatScene';
 import { consumeDragFlag, type PovTarget } from '../../scene/CameraController';
 import { FpsOverlay, type FpsSample } from '../../scene/FpsMeter';
@@ -29,6 +31,7 @@ export function VisorPage() {
   const [hint, setHint] = useState(false);
   const [fps, setFps] = useState<FpsSample | null>(null);
   const data = useSeatsStore((s) => s.data);
+  const { connected } = useSeatSocket(eventId);
 
   useEffect(() => {
     if (!eventId) return;
@@ -85,6 +88,7 @@ export function VisorPage() {
           <span className="eyebrow">{CATEGORY_LABEL[event.category]}</span>
           <h2>{event.name}</h2>
           <p className="faint">{event.venue.name} · {event.venue.city} · {(data?.count ?? 0).toLocaleString('es')} localidades</p>
+          <p className="event-banner-live" title={connected ? 'Disponibilidad actualizada en tiempo real' : 'Conectando con el servidor'}><i className={connected ? 'online' : ''} />{connected ? 'En vivo' : 'Conectando'}</p>
           <Link to="/">← Todos los eventos</Link>
         </section>
         {debug && <FpsOverlay sample={fps} seats={data?.count ?? 0} quality={quality} />}
