@@ -11,9 +11,10 @@ export function HelpPopover() {
         <div className="card help-pop">
           <span className="eyebrow">Estados de los asientos</span>
           <div className="legend-item"><span className="legend-dot" style={{ background: '#8ea3bf' }} />Disponible: color suave de su zona</div>
-          <div className="legend-item"><span className="legend-dot" style={{ background: COLORS.lockedMine }} />Seleccionado por ti</div>
+          <div className="legend-item"><span className="legend-dot" style={{ background: COLORS.lockedMine }} />Tu reserva (apartado por ti)</div>
+          <div className="legend-item"><span className="legend-dot" style={{ background: COLORS.lockedOther }} />En compra por otra persona</div>
           <div className="legend-item"><span className="legend-dot" style={{ background: COLORS.sold }} />Vendido</div>
-          <p className="notice" style={{ margin: '0.5rem 0 0' }}>Haz clic en un asiento para sentarte en él; desde ahí puedes seleccionarlo.</p>
+          <p className="notice" style={{ margin: '0.5rem 0 0' }}>Haz clic en un asiento para sentarte en él; desde ahí puedes apartarlo.</p>
         </div>
       )}
     </div>

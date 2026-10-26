@@ -1,11 +1,11 @@
 /**
  * Consulta de asientos y disponibilidad (issue #6).
- * El servidor es la fuente de verdad. Por ahora el estado sale solo de
- * PostgreSQL (AVAILABLE/SOLD); los bloqueos temporales (LOCKED) se añaden
- * cuando llegue el módulo de bloqueos en Redis.
+ * El servidor es la fuente de verdad: combina el estado persistente
+ * (PostgreSQL: AVAILABLE/SOLD) con los bloqueos efímeros (Redis).
  */
 import { prisma } from '../../lib/prisma';
 import { notFound } from '../../lib/errors';
+import { getLocksForEvent } from '../locks/locks.service';
 import { cachedViewQuality, distanceRange } from '../../lib/viewQuality';
 import type { VenueLayout } from '../../lib/layout';
 
@@ -45,6 +45,7 @@ export async function getEventSeats(eventId: string): Promise<EventSeatsPayload>
     select: { id: true, status: true, seat: { select: { id: true, idx: true, zoneId: true, row: true, number: true, posX: true, posY: true, posZ: true, rotY: true } } },
     orderBy: { seat: { idx: 'asc' } },
   });
+  const locks = await getLocksForEvent(eventId);
   const n = rows.length;
   const payload: EventSeatsPayload = {
     eventId, count: n, ids: new Array(n), seatIds: new Array(n), zoneIdx: new Array(n), rows: new Array(n), numbers: new Array(n),
@@ -61,7 +62,10 @@ export async function getEventSeats(eventId: string): Promise<EventSeatsPayload>
     payload.positions[i * 3 + 1] = r.seat.posY;
     payload.positions[i * 3 + 2] = r.seat.posZ;
     payload.rotations[i] = r.seat.rotY;
-    payload.status[i] = r.status === 'SOLD' ? STATUS_CODE.SOLD : STATUS_CODE.AVAILABLE;
+    const owner = locks.get(r.id);
+    if (r.status === 'SOLD') payload.status[i] = STATUS_CODE.SOLD;
+    else if (owner) { payload.status[i] = STATUS_CODE.LOCKED; payload.lockedBy[i] = owner; }
+    else payload.status[i] = STATUS_CODE.AVAILABLE;
   });
   // Calidad de vista: percentil por recinto (cacheado por venueId).
   const layout = event.venue.layout as unknown as VenueLayout;

@@ -1,15 +1,17 @@
 /**
- * Visor 3D del evento (issue #5): carga el recinto y sus asientos desde la API
- * y los dibuja con SeatScene. Clic en un asiento = vista desde ese asiento (POV).
- * Desde la vista POV el asiento se puede marcar como seleccionado (solo en el
- * cliente); todavía no se aparta en el servidor ni se compra.
+ * Visor 3D del evento (issues #5, #7, #8): carga el recinto y sus asientos desde
+ * la API y los dibuja con SeatScene. Clic en un asiento = vista desde ese asiento
+ * (POV); desde la tarjeta del asiento se aparta temporalmente en el servidor
+ * (bloqueo en Redis con TTL). Todavía no se compra.
  * La disponibilidad se mantiene al día por Socket.io (seats:update).
  * ?debug=1 muestra FPS; ?quality=low|high fuerza la calidad gráfica.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { eventsApi } from '../../api';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { eventsApi, locksApi } from '../../api';
+import { ApiError } from '../../api/client';
 import type { EventDetail } from '../../api/types';
+import { useAuthStore } from '../../store/auth';
 import { seatLabel, useSeatsStore } from '../../store/seats';
 import { useSeatSocket } from '../../sockets/useSeatSocket';
 import { SeatScene } from '../../scene/SeatScene';
@@ -19,22 +21,26 @@ import { detectQuality } from '../../scene/quality';
 import { CATEGORY_LABEL } from '../../components/EventInfoCard';
 import { HelpPopover } from '../../components/HelpPopover';
 import { SeatCard } from './SeatCard';
+import { ReservationCard } from './ReservationCard';
 
 export function VisorPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const [params] = useSearchParams();
   const debug = params.get('debug') === '1';
   const quality = detectQuality(params.toString() ? `?${params.toString()}` : '');
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ idx: number; x: number; y: number } | null>(null);
   const [pov, setPov] = useState<PovTarget | null>(null);
   const [focusIdx, setFocusIdx] = useState<number | null>(null);
   const [hint, setHint] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [fps, setFps] = useState<FpsSample | null>(null);
   const data = useSeatsStore((s) => s.data);
-  const selected = useSeatsStore((s) => s.selected);
   const { connected } = useSeatSocket(eventId);
 
   useEffect(() => {
@@ -48,12 +54,20 @@ export function VisorPage() {
         const payload = await eventsApi.seats(eventId);
         if (cancelled) return;
         useSeatsStore.getState().load(eventId, payload);
+        if (user) {
+          // Recupera los bloqueos vivos del usuario (p. ej. tras recargar la página).
+          const { locks } = await locksApi.mine(eventId);
+          const st = useSeatsStore.getState();
+          for (const l of locks) { const idx = st.data?.idToIdx.get(l.eventSeatId); if (idx !== undefined) st.select(idx, l.ttl); }
+        }
       } catch (e) { setError((e as Error).message); }
     })();
     return () => { cancelled = true; useSeatsStore.getState().reset(); };
-  }, [eventId]);
+  }, [eventId, user]);
 
-  /** Clic en un asiento: sienta la cámara en él. */
+  const flash = useCallback((msg: string) => { setNotice(msg); window.setTimeout(() => setNotice((m) => (m === msg ? null : m)), 4000); }, []);
+
+  /** Clic en un asiento: sienta la cámara en él. NO aparta ni llama a la API de bloqueo. */
   const sitAt = useCallback((idx: number) => {
     const d = useSeatsStore.getState().data;
     if (!d) return;
@@ -65,9 +79,33 @@ export function VisorPage() {
   }, []);
 
   const exitPov = useCallback(() => { setPov(null); setFocusIdx(null); setHint(false); useSeatsStore.getState().setFocused(null); }, []);
-  const select = useCallback((idx: number) => useSeatsStore.getState().select(idx, 0), []);
-  const deselect = useCallback((idx: number) => useSeatsStore.getState().deselect(idx), []);
   const onPovReady = useCallback(() => { setHint(true); window.setTimeout(() => setHint(false), 3500); }, []);
+
+  /** Único punto que aparta: botón "Apartar este asiento". */
+  const reserve = useCallback(async (idx: number) => {
+    const st = useSeatsStore.getState();
+    if (!st.data || !eventId) return;
+    if (!user) return navigate('/ingresar', { state: { from: `/eventos/${eventId}` } });
+    setBusy(true);
+    try {
+      const r = await locksApi.acquire(eventId, st.data.ids[idx]);
+      st.select(idx, r.ttl);
+      flash(`Apartado: ${seatLabel(st.data, idx)}. Lo tienes reservado por ${Math.round(r.ttl / 60)} minutos.`);
+    } catch (e) {
+      if (!(e instanceof ApiError)) return;
+      if (e.code === 'SEAT_TAKEN') flash('Alguien se adelantó: otra persona acaba de apartar este asiento.');
+      else if (e.code === 'SEAT_SOLD') flash('Este asiento ya fue vendido.');
+      else flash(e.message);
+    } finally { setBusy(false); }
+  }, [eventId, user, navigate, flash]);
+
+  const release = useCallback(async (idx: number) => {
+    const st = useSeatsStore.getState();
+    if (!st.data || !eventId) return;
+    await locksApi.release(eventId, st.data.ids[idx]).catch(() => undefined);
+    st.deselect(idx);
+  }, [eventId]);
+
   const onHover = useCallback((idx: number | null, screen: { x: number; y: number } | null) => {
     setTooltip(idx === null || !screen ? null : { idx, x: screen.x, y: screen.y });
   }, []);
@@ -86,8 +124,11 @@ export function VisorPage() {
         <div className="tooltip" style={{ left: tooltip.x + 14, top: tooltip.y + 14 }}>
           {seatLabel(data, tooltip.idx)} · ${data.zones[data.zoneIdx[tooltip.idx]]?.price.toFixed(2)}
           {st.status[tooltip.idx] === 2 && ' · vendido'}
+          {st.status[tooltip.idx] === 1 && (st.lockedBy.get(tooltip.idx) === user?.id ? ' · tu reserva' : ' · en compra por otro')}
         </div>
       )}
+
+      {notice && <div className="card card-tight toast" role="status">{notice}</div>}
 
       <div className="hud-tl">
         <section className="card card-tight" aria-label="Información del evento">
@@ -106,24 +147,11 @@ export function VisorPage() {
 
       <aside className="hud-tr">
         {pov && focusIdx !== null ? (
-          <SeatCard event={event} idx={focusIdx} onSelect={select} onDeselect={deselect} onMove={sitAt} onExit={exitPov} />
+          <SeatCard event={event} idx={focusIdx} busy={busy} onReserve={reserve} onRelease={release} onMove={sitAt} onExit={exitPov} />
         ) : (
-          <div className="card card-tight notice">Pasa el cursor sobre un asiento para ver sus datos y haz clic para sentarte en él. Desde ahí podrás seleccionarlo.</div>
+          <div className="card card-tight notice">Pasa el cursor sobre un asiento para ver sus datos y haz clic para sentarte en él. Desde ahí podrás apartarlo.</div>
         )}
-        {data && selected.length > 0 && (
-          <div className="card">
-            <span className="eyebrow">Tu selección</span>
-            {selected.map((i) => (
-              <div key={i} className="seat-row">
-                <button className="btn-ghost" style={{ padding: 0, border: 0, textAlign: 'left' }} onClick={() => sitAt(i)} title="Ver desde este asiento">
-                  <span className="zone-chip" style={{ background: data.zones[data.zoneIdx[i]]?.color }} />{seatLabel(data, i)}
-                </button>
-                <span>${(data.zones[data.zoneIdx[i]]?.price ?? 0).toFixed(2)}</span>
-                <button className="btn-ghost btn-icon" onClick={() => deselect(i)} title="Quitar de la selección" aria-label="Quitar">×</button>
-              </div>
-            ))}
-          </div>
-        )}
+        <ReservationCard busy={busy} onRelease={release} onGoTo={sitAt} />
       </aside>
     </div>
   );

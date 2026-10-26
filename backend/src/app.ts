@@ -1,4 +1,4 @@
-/** Aplicación Express. Rutas: /api/auth, /api/events, /api/health */
+/** Aplicación Express. Rutas: /api/auth, /api/events, /api/locks, /api/health */
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -6,6 +6,7 @@ import compression from 'compression';
 import { corsOrigins } from './config/env';
 import { authRouter } from './modules/auth/auth.routes';
 import { eventsRouter } from './modules/events/events.routes';
+import { locksRouter } from './modules/locks/locks.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 export function createApp() {
@@ -18,6 +19,7 @@ export function createApp() {
   app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'seatview-3d-api', time: new Date().toISOString() }));
   app.use('/api/auth', authRouter);
   app.use('/api/events', eventsRouter);
+  app.use('/api/locks', locksRouter);
 
   app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada', code: 'NOT_FOUND' }));
   app.use(errorHandler);
