@@ -16,3 +16,4 @@ export interface EventSeatsPayload {
   viewRange: { dMin: number; dMax: number };
 }
 export interface SeatChange { eventSeatId: string; status: 0 | 1 | 2; lockedBy?: string; ttl?: number }
+export interface SeatUpdateEvent { eventId: string; changes: SeatChange[]; at: number }
