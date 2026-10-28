@@ -60,7 +60,7 @@ Backlog inicial, alineado a los objetivos especificos reestructurados:
 |---|---|---|---|
 | Sprint 1 | Planeacion | Definicion del equipo, stack tecnologico, epicas e historias de usuario | Completado |
 | Sprint 2 | Diseño | Diagramas UML, modelo de datos (DER) y arquitectura del sistema | Completado |
-| Sprint 3 | Implementacion | Base del proyecto: escena 3D, modelo de datos, migraciones y autenticacion (19 oct - 1 nov 2026) | En curso |
+| Sprint 3 | Implementacion | Base del proyecto: escena 3D, modelo de datos, migraciones y autenticacion (19 oct - 1 nov 2026) | Completado |
 
 ### Sprint 3: estado del tablero
 
