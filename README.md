@@ -79,23 +79,25 @@ Backlog inicial, alineado a los objetivos especificos reestructurados:
 
 ## Como levantar el proyecto localmente
 
-Requisitos: Node.js 20 o superior, PostgreSQL y Redis (Redis se usara a partir del Sprint 3).
-
-Frontend:
+Requisitos: Node.js 20 o superior y Docker Desktop (PostgreSQL 16 y Redis 7 corren en contenedores).
 
 ```bash
-cd frontend
-npm install
-npm run dev     # http://localhost:5173
-npm test        # pruebas con Vitest
+docker compose up -d                     # PostgreSQL 16 y Redis 7
+cp backend/.env.example backend/.env     # revisar DATABASE_URL, REDIS_URL y los secretos
+cp frontend/.env.example frontend/.env   # VITE_API_URL y VITE_SOCKET_URL vacias: se usa el proxy de Vite
+npm ci                                   # instala frontend y backend (npm workspaces) y genera el cliente Prisma
+npm run db:migrate                       # aplica las migraciones
+npm run db:seed                          # estadio de ~8,500 asientos, eventos y usuarios de prueba
+npm run dev                              # backend http://localhost:4000 y frontend http://localhost:5173
 ```
 
-Backend:
+Verificacion: `npm run typecheck`, `npm run build` y `npm test` (las pruebas del backend usan el PostgreSQL y el Redis de Docker). El CI corre los mismos pasos en cada pull request.
 
-```bash
-cd backend
-cp .env.example .env   # ajustar DATABASE_URL, REDIS_URL y JWT_SECRET
-npm install
-npx prisma generate
-npm run dev            # http://localhost:4000/api/health
-```
+Usuarios de prueba (los crea el seed):
+
+| Usuario | Contrasena | Rol |
+|---|---|---|
+| javier.polanco@seatview.test | Javier12345! | Administrador |
+| andres.berrios@seatview.test | Andres12345! | Usuario |
+
+Como funciona el bloqueo de asientos y por que es seguro: [docs/concurrencia.md](docs/concurrencia.md).
