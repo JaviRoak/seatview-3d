@@ -29,6 +29,6 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1200,
       rollupOptions: { output: { manualChunks: { three: ['three', '@react-three/fiber', '@react-three/drei'] } } },
     },
-    test: { environment: 'jsdom', globals: true, setupFiles: ['src/test/setup.ts'], include: ['src/**/*.test.{ts,tsx}'], passWithNoTests: true },
+    test: { environment: 'jsdom', globals: true, setupFiles: ['src/test/setup.ts'], include: ['src/**/*.test.{ts,tsx}'] },
   };
 });
