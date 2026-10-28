@@ -9,7 +9,5 @@ export default defineConfig({
     // Las pruebas comparten Redis/PostgreSQL reales: se ejecutan en serie.
     fileParallelism: false,
     setupFiles: ['tests/setup.ts'],
-    // Sin archivos de prueba todavía: la suite del backend se integra en un PR posterior.
-    passWithNoTests: true,
   },
 });
