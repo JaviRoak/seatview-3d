@@ -1,7 +1,8 @@
-/** Pago y confirmación (issue #9) contra PostgreSQL y Redis reales. */
+/** Pago y confirmación (issues #9 y #10) contra PostgreSQL y Redis reales. */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { checkout } from '../src/modules/payments/payments.service';
 import { LockService, lockService, userSetKey } from '../src/modules/locks/locks.service';
+import { verifyTicketCode } from '../src/modules/tickets/tickets.service';
 import { prisma } from '../src/lib/prisma';
 import { redis } from '../src/lib/redis';
 import { env } from '../src/config/env';
@@ -39,13 +40,16 @@ describe('checkout', () => {
     expect(await lockService.owner(fx.event.id, fx.eventSeatIds[2])).toBe(fx.userA.id); // el bloqueo sigue vivo
     expect(await prisma.order.findFirst({ where: { eventId: fx.event.id, status: 'FAILED' } })).not.toBeNull();
   });
-  it('el pago exitoso marca vendidos y libera Redis', async () => {
+  it('el pago exitoso marca vendidos, genera tickets firmados y libera Redis', async () => {
     const ids = [fx.eventSeatIds[3], fx.eventSeatIds[4]];
     for (const id of ids) await lockService.acquire(fx.event.id, id, fx.userA.id);
     const result = await checkout(authUser(fx.userA), { eventId: fx.event.id, eventSeatIds: ids, card: okCard }, { charge: fastCharge });
     expect(result.total).toBe(20);
-    expect(result.seats).toHaveLength(2);
-    expect((await prisma.order.findUnique({ where: { id: result.orderId } }))?.status).toBe('PAID');
+    expect(result.tickets).toHaveLength(2);
+    for (const t of result.tickets) {
+      expect(verifyTicketCode(t.code).oid).toBe(result.orderId);
+      expect(t.qrData.startsWith('data:image/png;base64,')).toBe(true);
+    }
     const rows = await prisma.eventSeat.findMany({ where: { id: { in: ids } } });
     expect(rows.every((r) => r.status === 'SOLD' && r.orderId === result.orderId)).toBe(true);
     for (const id of ids) expect(await lockService.owner(fx.event.id, id)).toBeNull();

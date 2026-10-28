@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { AuthUser, EventDetail, EventSeatsPayload, EventSummary } from './types';
+import type { AuthUser, EventDetail, EventSeatsPayload, EventSummary, Ticket } from './types';
 
 export const authApi = {
   login: (email: string, password: string) => api<{ user: AuthUser; token: string }>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -20,5 +20,6 @@ export const locksApi = {
 export interface CardInput { holder: string; number: string; expMonth: number; expYear: number; cvc: string }
 export const paymentsApi = {
   checkout: (eventId: string, eventSeatIds: string[], card: CardInput) =>
-    api<{ orderId: string; total: number; authCode: string; seats: Array<{ eventSeatId: string; zone: string; row: string; number: number; price: number }> }>('/payments/checkout', { method: 'POST', body: JSON.stringify({ eventId, eventSeatIds, card }) }),
+    api<{ orderId: string; total: number; authCode: string; tickets: Array<{ id: string; eventSeatId: string; code: string; qrData: string }> }>('/payments/checkout', { method: 'POST', body: JSON.stringify({ eventId, eventSeatIds, card }) }),
 };
+export const ticketsApi = { mine: () => api<{ tickets: Ticket[] }>('/tickets/mine') };
