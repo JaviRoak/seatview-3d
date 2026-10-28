@@ -1,11 +1,11 @@
 /**
- * Pago simulado y confirmación de compra (issue #9).
+ * Pago simulado y confirmación de compra (issue #9), generación de boletos (#10).
  *
  * Flujo de `checkout`:
  *  1. Verificar que cada bloqueo en Redis sigue perteneciendo al usuario.
  *  2. Cobrar en la pasarela SIMULADA (1–2 s; la tarjeta 4000 0000 0000 0002 siempre falla).
- *  3. En UNA transacción de Prisma: re-verificar bloqueo, crear la orden y
- *     marcar EventSeat → SOLD solo si sigue AVAILABLE.
+ *  3. En UNA transacción de Prisma: re-verificar bloqueo, crear la orden,
+ *     marcar EventSeat → SOLD solo si sigue AVAILABLE, y crear los tickets.
  *  4. Borrar las claves de Redis y emitir el cambio por Socket.io.
  *
  * Por qué es seguro: el bloqueo garantiza que solo un usuario llega al paso 3
@@ -13,10 +13,13 @@
  * la transacción garantiza que, aun si el bloqueo expirase entre 1 y 3, nunca
  * se venda dos veces (count < esperado → rollback).
  */
+import { randomBytes } from 'crypto';
 import { prisma } from '../../lib/prisma';
 import { conflict, badRequest, HttpError } from '../../lib/errors';
 import { lockService, seatKey, userSetKey } from '../locks/locks.service';
 import { emitSeatUpdate } from '../../sockets';
+import { makeQrDataUrl, signTicketCode } from '../tickets/tickets.service';
+import { sendTicketsEmail } from '../tickets/mail.service';
 import { redis } from '../../lib/redis';
 import type { AuthUser } from '../auth/auth.service';
 
@@ -87,7 +90,13 @@ export async function checkout(user: AuthUser, input: CheckoutInput, deps: Check
     const order = await tx.order.create({ data: { userId: user.id, eventId, total, status: 'PAID', cardLast4: input.card.number.slice(-4) } });
     const updated = await tx.eventSeat.updateMany({ where: { id: { in: eventSeatIds }, eventId, status: 'AVAILABLE' }, data: { status: 'SOLD', orderId: order.id } });
     if (updated.count !== eventSeatIds.length) throw conflict('Un asiento dejó de estar disponible', 'SEAT_SOLD'); // rollback
-    return { order };
+    const tickets = [];
+    for (const r of rows) {
+      const ticketId = 'tk_' + randomBytes(10).toString('hex');
+      const code = signTicketCode({ tid: ticketId, oid: order.id, esid: r.id, eid: eventId });
+      tickets.push(await tx.ticket.create({ data: { id: ticketId, orderId: order.id, eventSeatId: r.id, code, qrData: await makeQrDataUrl(code) } }));
+    }
+    return { order, tickets };
   });
 
   // 4. Liberar Redis y notificar.
@@ -95,8 +104,13 @@ export async function checkout(user: AuthUser, input: CheckoutInput, deps: Check
   await redis.srem(userSetKey(eventId, user.id), ...eventSeatIds);
   emitSeatUpdate(eventId, eventSeatIds.map((id) => ({ eventSeatId: id, status: 2 as const })));
 
+  void sendTicketsEmail({
+    to: user.email, name: user.name, eventName: rows[0].event.name, eventDate: rows[0].event.date, orderId: result.order.id,
+    seats: rows.map((r) => ({ zone: r.seat.zone.name, row: r.seat.row, number: r.seat.number, code: result.tickets.find((t) => t.eventSeatId === r.id)!.code })),
+  }).catch((e) => console.error('[correo]', e));
+
   return {
     orderId: result.order.id, total, authCode: gw.authCode,
-    seats: rows.map((r) => ({ eventSeatId: r.id, zone: r.seat.zone.name, row: r.seat.row, number: r.seat.number, price: Number(r.seat.zone.price) })),
+    tickets: result.tickets.map((t) => ({ id: t.id, eventSeatId: t.eventSeatId, code: t.code, qrData: t.qrData })),
   };
 }
