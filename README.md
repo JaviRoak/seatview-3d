@@ -66,10 +66,16 @@ Backlog inicial, alineado a los objetivos especificos reestructurados:
 |---|---|---|---|
 | Escena base en R3F con recinto procedural y asientos con InstancedMesh | Historia 1 (#5) | #12 | Completado |
 | API inicial Express + TypeScript | Epica 1 (#1) | #12 | Completado |
-| Monorepo con npm workspaces, Prisma 7 y docker-compose (PostgreSQL + Redis) | Epica 1 (#1) | #13 | En Revision (QA) |
-| Modelo de datos, migraciones y seed del estadio (~8,500 asientos) | Historia 7 (#11) | #14 | En Revision (QA) |
-| Nucleo del backend y autenticacion con JWT (registro, login, roles) | Historia 7 (#11) | #15 | En Revision (QA) |
-| Pruebas del backend (Vitest) | Epica 4 (#4) | - | Sprint Actual |
+| Monorepo con npm workspaces, Prisma 7 y docker-compose (PostgreSQL + Redis) | Epica 1 (#1) | #13 | Completado |
+| Modelo de datos, migraciones y seed del estadio (~8,500 asientos) | Historia 7 (#11) | #14 | Completado |
+| Nucleo del backend y autenticacion con JWT (registro, login, roles) | Historia 7 (#11) | #15 | Completado |
+| API de eventos, recintos, zonas y mapa de asientos | Historia 7 (#11) | #30 | Completado |
+| Visor 3D del estadio conectado a la API (camara orbital y vista desde el asiento) | Historia 1 (#5) | #31 | Completado |
+| Disponibilidad de asientos en tiempo real con Socket.io | Historia 2 (#6) | #32 | Completado |
+| Seleccion de asiento desde la vista previa | Historia 3 (#7) | #33 | Completado |
+| Bloqueo temporal de asientos en Redis e inicio de sesion | Historia 4 (#8) | #34 | Completado |
+| Pruebas automatizadas (backend contra PostgreSQL y Redis reales, frontend) y CI con GitHub Actions | Epica 4 (#4) | #35 | Completado |
+| Documentacion de concurrencia y README del Sprint 3 | Historia 4 (#8) | docs/readme-sprint-3 | En Revision (QA) |
 
 ## Como levantar el proyecto localmente
 
