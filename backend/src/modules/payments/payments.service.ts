@@ -15,7 +15,7 @@
  */
 import { prisma } from '../../lib/prisma';
 import { conflict, badRequest, HttpError } from '../../lib/errors';
-import { lockService, seatKey } from '../locks/locks.service';
+import { lockService, seatKey, userSetKey } from '../locks/locks.service';
 import { emitSeatUpdate } from '../../sockets';
 import { redis } from '../../lib/redis';
 import type { AuthUser } from '../auth/auth.service';
@@ -92,7 +92,7 @@ export async function checkout(user: AuthUser, input: CheckoutInput, deps: Check
 
   // 4. Liberar Redis y notificar.
   await redis.del(...eventSeatIds.map((id) => seatKey(eventId, id)));
-  for (const id of eventSeatIds) await lockService.release(eventId, id, user.id).catch(() => undefined);
+  await redis.srem(userSetKey(eventId, user.id), ...eventSeatIds);
   emitSeatUpdate(eventId, eventSeatIds.map((id) => ({ eventSeatId: id, status: 2 as const })));
 
   return {

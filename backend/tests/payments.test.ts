@@ -1,8 +1,10 @@
 /** Pago y confirmación (issue #9) contra PostgreSQL y Redis reales. */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { checkout } from '../src/modules/payments/payments.service';
-import { LockService, lockService } from '../src/modules/locks/locks.service';
+import { LockService, lockService, userSetKey } from '../src/modules/locks/locks.service';
 import { prisma } from '../src/lib/prisma';
+import { redis } from '../src/lib/redis';
+import { env } from '../src/config/env';
 import { createFixture, cleanupFixture, authUser, okCard, badCard } from './helpers';
 
 let fx: Awaited<ReturnType<typeof createFixture>>;
@@ -54,5 +56,17 @@ describe('checkout', () => {
     await expect(checkout(authUser(fx.userB), { eventId: fx.event.id, eventSeatIds: [id], card: okCard }, { charge: fastCharge }))
       .rejects.toMatchObject({ code: 'SEAT_SOLD' });
     await lockService.release(fx.event.id, id, fx.userB.id);
+  });
+  it('después de pagar, los asientos comprados no cuentan para el límite de bloqueos', async () => {
+    // Escenario propio: 2 asientos para comprar + MAX_LOCKS_PER_USER libres para apartar después.
+    const f2 = await createFixture(env.MAX_LOCKS_PER_USER + 2);
+    try {
+      const bought = f2.eventSeatIds.slice(0, 2);
+      for (const id of bought) await lockService.acquire(f2.event.id, id, f2.userA.id);
+      await checkout(authUser(f2.userA), { eventId: f2.event.id, eventSeatIds: bought, card: okCard }, { charge: fastCharge });
+      const members = await redis.smembers(userSetKey(f2.event.id, f2.userA.id));
+      for (const id of bought) expect(members).not.toContain(id);
+      for (const id of f2.eventSeatIds.slice(2)) expect(await lockService.acquire(f2.event.id, id, f2.userA.id)).toBe('ACQUIRED');
+    } finally { await cleanupFixture(f2); }
   });
 });
