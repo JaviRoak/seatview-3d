@@ -5,6 +5,7 @@ import { VisorPage } from './features/events/VisorPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { CheckoutPage } from './features/checkout/CheckoutPage';
 import { TicketsPage } from './features/tickets/TicketsPage';
+import { AdminPage } from './features/admin/AdminPage';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/eventos/:eventId/pago" element={<CheckoutPage />} />
         <Route path="/boletos" element={<TicketsPage />} />
         <Route path="/ingresar" element={<LoginPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   );

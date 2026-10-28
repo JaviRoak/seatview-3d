@@ -11,6 +11,7 @@ export function TopBar() {
       <nav>
         <NavLink to="/">Eventos</NavLink>
         {user && <NavLink to="/boletos">Mis boletos</NavLink>}
+        {user?.role === 'ADMIN' && <NavLink to="/admin">Administración</NavLink>}
         {user ? (
           <>
             <span className="muted" style={{ fontSize: '0.85rem' }}>{user.name}</span>
