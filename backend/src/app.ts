@@ -9,11 +9,13 @@ import { eventsRouter } from './modules/events/events.routes';
 import { locksRouter } from './modules/locks/locks.routes';
 import { paymentsRouter } from './modules/payments/payments.routes';
 import { ticketsRouter } from './modules/tickets/tickets.routes';
+import { adminRouter } from './modules/admin/admin.routes';
+import { UPLOADS_DIR } from './lib/storage';
 import { errorHandler } from './middleware/errorHandler';
 
 export function createApp() {
   const app = express();
-  app.use(helmet());
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } })); // las imágenes de /uploads se ven desde el frontend en otro origen
   app.use(compression()); // el mapa de asientos (≈750 KB / 8k asientos) viaja gzip
   app.use(cors({ origin: corsOrigins, credentials: true }));
   app.use(express.json({ limit: '200kb' }));
@@ -24,6 +26,8 @@ export function createApp() {
   app.use('/api/locks', locksRouter);
   app.use('/api/payments', paymentsRouter);
   app.use('/api/tickets', ticketsRouter);
+  app.use('/api/admin', adminRouter);
+  app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '7d', index: false }));
 
   app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada', code: 'NOT_FOUND' }));
   app.use(errorHandler);
