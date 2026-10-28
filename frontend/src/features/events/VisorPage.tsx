@@ -2,7 +2,7 @@
  * Visor 3D del evento (issues #5, #7, #8): carga el recinto y sus asientos desde
  * la API y los dibuja con SeatScene. Clic en un asiento = vista desde ese asiento
  * (POV); desde la tarjeta del asiento se aparta temporalmente en el servidor
- * (bloqueo en Redis con TTL). Todavía no se compra.
+ * (bloqueo en Redis con TTL) y desde "Tu reserva" se pasa al pago.
  * La disponibilidad se mantiene al día por Socket.io (seats:update).
  * ?debug=1 muestra FPS; ?quality=low|high fuerza la calidad gráfica.
  */
@@ -151,7 +151,7 @@ export function VisorPage() {
         ) : (
           <div className="card card-tight notice">Pasa el cursor sobre un asiento para ver sus datos y haz clic para sentarte en él. Desde ahí podrás apartarlo.</div>
         )}
-        <ReservationCard busy={busy} onRelease={release} onGoTo={sitAt} />
+        <ReservationCard busy={busy} onRelease={release} onGoTo={sitAt} onCheckout={() => navigate(`/eventos/${event.id}/pago`)} />
       </aside>
     </div>
   );
