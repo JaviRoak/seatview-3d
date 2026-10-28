@@ -1,9 +1,9 @@
 /**
- * Checkout con pago simulado (issues #8, #9).
+ * Checkout con pago simulado (issues #8, #9, #10).
  * - Asientos reservados re-verificados contra el servidor; cuenta regresiva y botón para extender.
  * - Formulario de tarjeta con validación básica (Luhn, fecha, CVC).
  * - Tarjetas de prueba: 4242… aprueba, 4000 0000 0000 0002 siempre falla.
- * - El servidor valida el bloqueo, cobra y vende en una transacción; aquí se muestra la confirmación.
+ * - El servidor valida el bloqueo, cobra, vende en transacción y devuelve los boletos con QR.
  */
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -13,6 +13,7 @@ import type { EventDetail } from '../../api/types';
 import { seatLabel, useSeatsStore } from '../../store/seats';
 import { useAuthStore } from '../../store/auth';
 import { Countdown } from '../../components/Countdown';
+import { TicketCard } from '../../components/TicketCard';
 import { CATEGORY_LABEL } from '../../components/EventInfoCard';
 
 export function luhn(num: string): boolean {
@@ -23,7 +24,7 @@ export function luhn(num: string): boolean {
   return sum % 10 === 0;
 }
 
-type Result = { orderId: string; total: number; authCode?: string; seats: Array<{ eventSeatId: string; zone: string; row: string; number: number; price: number }> };
+type Result = { orderId: string; total: number; tickets: Array<{ id: string; qrData: string; eventSeatId: string }> };
 
 export function CheckoutPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -96,16 +97,18 @@ export function CheckoutPage() {
         <div className="card">
           <span className="eyebrow">Orden confirmada</span>
           <h1>Compra confirmada</h1>
-          <p>Orden <code>{result.orderId}</code> · Total ${result.total.toFixed(2)}{result.authCode && <> · Autorización <code>{result.authCode}</code></>}</p>
-          {event && <p className="muted">{event.name} · {event.venue.name} · {new Date(event.date).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short' })}</p>}
-          {result.seats.map((s) => (
-            <div key={s.eventSeatId} className="seat-row">
-              <span>{s.zone} · Fila {s.row} · Asiento {s.number}</span>
-              <span>${s.price.toFixed(2)}</span>
-            </div>
-          ))}
+          <p>Orden <code>{result.orderId}</code> · Total ${result.total.toFixed(2)}. Te enviamos los boletos por correo (simulado en la consola del servidor).</p>
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {result.tickets.map((t) => {
+              const i = data?.idToIdx.get(t.eventSeatId);
+              const zone = data && i !== undefined ? data.zones[data.zoneIdx[i]] : undefined;
+              return <TicketCard key={t.id} eventName={event?.name ?? ''} date={event?.date ?? new Date().toISOString()} venue={event?.venue.name ?? ''} city={event?.venue.city}
+                zone={zone?.name ?? ''} zoneColor={zone?.color} row={data && i !== undefined ? data.rows[i] : '—'} number={data && i !== undefined ? data.numbers[i] : 0} price={zone?.price} qrData={t.qrData} code={t.id} />;
+            })}
+          </div>
           <div className="row-actions">
-            <button className="btn-primary" onClick={() => navigate(`/eventos/${eventId}`)}>Volver al mapa</button>
+            <button className="btn-primary" onClick={() => navigate('/boletos')}>Ir a Mis boletos</button>
+            <button className="btn-ghost" onClick={() => navigate(`/eventos/${eventId}`)}>Volver al mapa</button>
           </div>
         </div>
       </main>

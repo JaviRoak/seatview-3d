@@ -17,3 +17,9 @@ export interface EventSeatsPayload {
 }
 export interface SeatChange { eventSeatId: string; status: 0 | 1 | 2; lockedBy?: string; ttl?: number }
 export interface SeatUpdateEvent { eventId: string; changes: SeatChange[]; at: number }
+export interface Ticket {
+  id: string; code: string; qrData: string; usedAt: string | null; createdAt: string;
+  order: { id: string; total: number; createdAt: string };
+  event: { id: string; name: string; date: string; venue: string; city: string };
+  seat: { eventSeatId: string; zone: string; zoneColor: string; price: number; row: string; number: number };
+}
