@@ -23,3 +23,5 @@ export interface Ticket {
   event: { id: string; name: string; date: string; venue: string; city: string };
   seat: { eventSeatId: string; zone: string; zoneColor: string; price: number; row: string; number: number };
 }
+export interface MediaAsset { id: string; filename: string; mimeType: string; size: number; url: string; createdAt: string }
+export interface AdminEvent { id: string; name: string; date: string; category: EventCategory; coverImageUrl: string | null; venue: string; assetId: string | null }
