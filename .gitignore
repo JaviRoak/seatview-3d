@@ -141,3 +141,29 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# ---------- SeatView 3D ----------
+# Cliente Prisma generado (se regenera con `prisma generate` / npm install)
+backend/src/generated/
+backend/prisma/*.db
+
+# Volúmenes locales de Docker
+pgdata/
+redisdata/
+
+# Pruebas
+.vitest/
+
+# Editores / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Imágenes subidas por administradores (solo .gitkeep va al repo)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Respaldos locales generados por los scripts de recintos
+backend/backups/

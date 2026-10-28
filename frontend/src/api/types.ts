@@ -1,0 +1,27 @@
+/** Tipos compartidos con la API (espejo de las respuestas del backend). */
+export interface AuthUser { id: string; email: string; name: string; role: 'USER' | 'ADMIN' }
+export type EventCategory = 'FUTBOL' | 'CONCIERTO' | 'OTRO';
+export interface EventSummary { id: string; name: string; description: string | null; date: string; category: EventCategory; coverImageUrl: string | null; venue: { id: string; name: string; city: string }; totalSeats: number; soldSeats: number }
+export interface Zone { id: string; name: string; color: string; price: number; generalAdmission?: boolean; capacity?: number }
+export interface LevelSpec { name: string; rows: number; rowDepth: number; rowRise: number; baseHeight: number; baseOffset: number }
+export interface VenueModel { url: string; radius: number; height: number; seatingFootprint: { width: number; depth: number } }
+export interface VenueLayout { concert?: { kind: 'beele' | 'bocelli'; demo: boolean }; admission?: { mode: 'mixed'; crowdUrl: string }; model?: VenueModel; field: { width: number; depth: number }; corner: number; seatPitch: number; aisleAngle: number; levels: LevelSpec[]; stands: string[] }
+export interface EventDetail { id: string; name: string; description: string | null; date: string; category: EventCategory; coverImageUrl: string | null; venue: { id: string; name: string; city: string; imageUrl: string | null; layout: VenueLayout; zones: Zone[] } }
+/** Respuesta compacta de /events/:id/seats (arrays paralelos). */
+export interface EventSeatsPayload {
+  eventId: string; count: number; ids: string[]; seatIds: string[]; zoneIdx: number[]; rows: string[]; numbers: number[];
+  positions: number[]; rotations: number[]; status: number[]; lockedBy: Record<number, string>; zones: Zone[];
+  /** percentil de calidad de vista 0..100 dentro del recinto */
+  viewPct: number[];
+  viewRange: { dMin: number; dMax: number };
+}
+export interface SeatChange { eventSeatId: string; status: 0 | 1 | 2; lockedBy?: string; ttl?: number }
+export interface SeatUpdateEvent { eventId: string; changes: SeatChange[]; at: number }
+export interface Ticket {
+  id: string; code: string; qrData: string; usedAt: string | null; createdAt: string;
+  order: { id: string; total: number; createdAt: string };
+  event: { id: string; name: string; date: string; venue: string; city: string };
+  seat: { eventSeatId: string; zone: string; zoneColor: string; price: number; row: string; number: number };
+}
+export interface MediaAsset { id: string; filename: string; mimeType: string; size: number; url: string; createdAt: string }
+export interface AdminEvent { id: string; name: string; date: string; category: EventCategory; coverImageUrl: string | null; venue: string; assetId: string | null }

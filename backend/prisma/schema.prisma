@@ -1,0 +1,175 @@
+// Esquema de datos de SeatView 3D (issue #11: gestión de recintos, zonas y eventos).
+// Los bloqueos temporales de asientos NO viven aquí: se guardan solo en Redis
+// con TTL (ver src/modules/locks y docs/concurrencia.md).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EventSeatStatus {
+  AVAILABLE
+  SOLD
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum EventCategory {
+  FUTBOL
+  CONCIERTO
+  OTRO
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  orders       Order[]
+  uploads      MediaAsset[]
+}
+
+/// Recinto físico. Sus parámetros de diseño se usan para generar la geometría
+/// procedural en el seed (posiciones) y en el frontend (gradas, campo).
+model Venue {
+  id          String  @id @default(cuid())
+  name        String
+  city        String
+  description String?
+  /// Imagen del recinto (URL servida por /uploads o un proveedor externo)
+  imageUrl    String?
+  /// Parámetros de generación procedural (JSON): campo, niveles, filas por nivel...
+  layout      Json
+  zones       Zone[]
+  seats       Seat[]
+  events      Event[]
+}
+
+/// Zona de precio dentro de un recinto (p. ej. "Tribuna Norte · Nivel 1").
+model Zone {
+  id      String  @id @default(cuid())
+  venueId String
+  venue   Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name    String
+  /// Color hexadecimal base de la zona en el mapa 3D (#RRGGBB)
+  color   String
+  /// Precio en USD con dos decimales
+  price   Decimal @db.Decimal(10, 2)
+  sortIdx Int     @default(0)
+  seats   Seat[]
+
+  @@index([venueId])
+}
+
+/// Asiento físico. La posición 3D se calcula una sola vez en el seed.
+model Seat {
+  id         String      @id @default(cuid())
+  venueId    String
+  venue      Venue       @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  zoneId     String
+  zone       Zone        @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  /// Índice estable 0..N-1 dentro del recinto: coincide con el instanceId del InstancedMesh
+  idx        Int
+  row        String
+  number     Int
+  posX       Float
+  posY       Float
+  posZ       Float
+  /// Rotación en Y (radianes): el asiento mira hacia el centro del campo
+  rotY       Float
+  eventSeats EventSeat[]
+
+  @@unique([venueId, idx])
+  @@unique([zoneId, row, number])
+  @@index([zoneId])
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  venueId     String
+  venue       Venue       @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  date          DateTime
+  category      EventCategory @default(OTRO)
+  /// Imagen de cabecera subida por un administrador; null → SVG procedural (EventCover)
+  coverImageUrl String?
+  eventSeats    EventSeat[]
+  orders        Order[]
+
+  @@index([venueId, date])
+}
+
+/// Archivo subido por un administrador (issue #11, gestión de eventos).
+model MediaAsset {
+  id           String   @id @default(cuid())
+  filename     String
+  mimeType     String
+  size         Int
+  /// URL pública relativa (/uploads/<uuid>.<ext>) o absoluta si el proveedor es externo
+  url          String   @unique
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+/// Estado persistente de un asiento para un evento. Solo AVAILABLE o SOLD:
+/// el estado "bloqueado" es efímero y vive en Redis.
+model EventSeat {
+  id      String          @id @default(cuid())
+  eventId String
+  event   Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  seatId  String
+  seat    Seat            @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  status  EventSeatStatus @default(AVAILABLE)
+  orderId String?
+  order   Order?          @relation(fields: [orderId], references: [id])
+  ticket  Ticket?
+
+  @@unique([eventId, seatId])
+  @@index([eventId, status])
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  eventId    String
+  event      Event       @relation(fields: [eventId], references: [id])
+  total      Decimal     @db.Decimal(10, 2)
+  status     OrderStatus @default(PENDING)
+  /// Últimos 4 dígitos de la tarjeta (pasarela simulada)
+  cardLast4  String?
+  createdAt  DateTime    @default(now())
+  eventSeats EventSeat[]
+  tickets    Ticket[]
+}
+
+model Ticket {
+  id          String    @id @default(cuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  eventSeatId String    @unique
+  eventSeat   EventSeat @relation(fields: [eventSeatId], references: [id])
+  /// Código único firmado (JWT HS256 con TICKET_SECRET) que se codifica en el QR
+  code        String    @unique
+  /// Imagen QR como Data URL (PNG base64)
+  qrData      String
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+}

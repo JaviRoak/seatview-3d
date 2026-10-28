@@ -1,0 +1,72 @@
+# Integración continua: typecheck, build y pruebas contra PostgreSQL y Redis reales.
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: seatview
+          POSTGRES_PASSWORD: seatview
+          POSTGRES_DB: seatview
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U seatview"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://seatview:seatview@localhost:5432/seatview
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-jwt-secret-solo-para-pruebas
+      TICKET_SECRET: ci-ticket-secret-solo-para-pruebas
+      CORS_ORIGINS: http://localhost:5173
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Los servicios de Actions no aceptan argumentos de arranque: se activan las
+      # notificaciones de expiración (equivale a --notify-keyspace-events Ex).
+      - name: Notificaciones de expiración en Redis
+        run: docker exec ${{ job.services.redis.id }} redis-cli config set notify-keyspace-events Ex
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Migraciones
+        run: npx prisma migrate deploy
+        working-directory: backend
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Pruebas
+        run: npm test
