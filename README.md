@@ -60,7 +60,7 @@ Backlog inicial, alineado a los objetivos especificos reestructurados:
 |---|---|---|---|
 | Sprint 1 | Planeacion | Definicion del equipo, stack tecnologico, epicas e historias de usuario | Completado |
 | Sprint 2 | Diseño | Diagramas UML, modelo de datos (DER) y arquitectura del sistema | Completado |
-| Sprint 3 | Implementacion | Base del proyecto: escena 3D, modelo de datos, migraciones y autenticacion (19 oct - 1 nov 2026) | En curso |
+| Sprint 3 | Implementacion | Base del proyecto: escena 3D, modelo de datos, migraciones y autenticacion (19 oct - 1 nov 2026) | Completado |
 
 ### Sprint 3: estado del tablero
 
@@ -77,7 +77,12 @@ Backlog inicial, alineado a los objetivos especificos reestructurados:
 | Seleccion de asiento desde la vista previa | Historia 3 (#7) | #33 | Completado |
 | Bloqueo temporal de asientos en Redis e inicio de sesion | Historia 4 (#8) | #34 | Completado |
 | Pruebas automatizadas (backend contra PostgreSQL y Redis reales, frontend) y CI con GitHub Actions | Epica 4 (#4) | #35 | Completado |
-| Documentacion de concurrencia y README del Sprint 3 | Historia 4 (#8) | docs/readme-sprint-3 | En Revision (QA) |
+| Documentacion de concurrencia y README del Sprint 3 | Historia 4 (#8) | #36 | Completado |
+| Pago simulado y confirmacion de reserva (checkout atomico sobre los bloqueos) | Historia 5 (#9) | #37 | Completado |
+| Boleto electronico con codigo QR firmado, Mis boletos y correo simulado | Historia 6 (#10) | #38 | Completado |
+| Panel de administracion: subida de imagenes y edicion de eventos | Historia 7 (#11) | #39 | Completado (parcial: recintos y zonas por seed) |
+
+Historia 7 (#11): la creacion y edicion de recintos y zonas desde el panel de administracion queda para el Sprint 4. En el Sprint 3 los recintos y sus zonas se generan con el layout procedural y se cargan con el seed.
 
 ## Como levantar el proyecto localmente
 
