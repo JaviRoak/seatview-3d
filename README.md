@@ -1,5 +1,7 @@
 # SeatView 3D
 
+[![CI](https://github.com/JaviRoak/seatview-3d/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/JaviRoak/seatview-3d/actions/workflows/ci.yml)
+
 Vista previa 3D de asientos para plataformas de boletaje: los usuarios exploran un recinto generado proceduralmente y ven, desde el asiento que elijan, como se veria el evento antes de comprar su entrada.
 
 ## Equipo Scrum
