@@ -9,6 +9,7 @@ import { prisma } from '../src/lib/prisma';
 import { UPLOADS_DIR } from '../src/lib/storage';
 import { sniffImage } from '../src/lib/imageSniff';
 import bcrypt from 'bcryptjs';
+import { createFixture, cleanupFixture } from './helpers';
 
 const app = createApp();
 const PNG_1x1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
@@ -82,14 +83,15 @@ describe('POST /api/admin/uploads', () => {
     expect((await request(app).get(asset.url)).status).toBe(200);
 
     // Asignar al evento y luego borrar → el evento queda sin imagen
-    const ev = await prisma.event.findFirstOrThrow();
+    const fx = await createFixture(1);
+    const ev = fx.event;
     const p = await request(app).patch(`/api/admin/events/${ev.id}`).set('Authorization', `Bearer ${adminToken}`).send({ coverImageUrl: asset.url, category: 'CONCIERTO' });
     expect(p.status).toBe(200);
     expect(p.body.event.coverImageUrl).toBe(asset.url);
     const d = await request(app).delete(`/api/admin/uploads/${asset.id}`).set('Authorization', `Bearer ${adminToken}`);
     expect(d.status).toBe(200);
     expect((await prisma.event.findUniqueOrThrow({ where: { id: ev.id } })).coverImageUrl).toBeNull();
-    await prisma.event.update({ where: { id: ev.id }, data: { category: ev.category } });
+    await cleanupFixture(fx);
     created.pop();
   });
 });
