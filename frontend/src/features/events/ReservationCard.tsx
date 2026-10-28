@@ -1,8 +1,8 @@
-/** Reserva: asientos apartados uno a uno y cuenta regresiva hasta que expiren. */
+/** Carrito de reservas: asientos apartados uno a uno, cuenta regresiva y pago. */
 import { Countdown } from '../../components/Countdown';
 import { seatLabel, useSeatsStore } from '../../store/seats';
 
-export function ReservationCard({ onRelease, onGoTo,busy=false }: { onRelease: (idx: number) => void; onGoTo: (idx: number) => void;busy?:boolean }) {
+export function ReservationCard({ onRelease, onCheckout, onGoTo,busy=false }: { onRelease: (idx: number) => void; onCheckout: () => void; onGoTo: (idx: number) => void;busy?:boolean }) {
   const data = useSeatsStore((s) => s.data);
   const selected = useSeatsStore((s) => s.selected);
   const ttls = useSeatsStore((s) => s.ttls);
@@ -27,6 +27,7 @@ export function ReservationCard({ onRelease, onGoTo,busy=false }: { onRelease: (
         </div>
       ))}
       <div className="total"><span>Total</span><span>${total.toFixed(2)}</span></div>
+      <div className="row-actions"><button className="btn-primary" disabled={busy} onClick={onCheckout}>Pagar ahora</button></div>
     </div>
   );
 }

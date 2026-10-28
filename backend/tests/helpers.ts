@@ -28,3 +28,5 @@ export async function cleanupFixture(f: Awaited<ReturnType<typeof createFixture>
 }
 
 export const authUser = (u: { id: string; email: string; name: string; role: 'USER' | 'ADMIN' }) => ({ id: u.id, email: u.email, name: u.name, role: u.role });
+export const okCard = { holder: 'Test User', number: '4242424242424242', expMonth: 12, expYear: 2030, cvc: '123' };
+export const badCard = { ...okCard, number: '4000000000000002' };

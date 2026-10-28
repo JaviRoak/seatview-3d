@@ -17,3 +17,8 @@ export const locksApi = {
   extend: (eventId: string, eventSeatId: string) => api<{ eventSeatId: string; ttl: number }>('/locks/extend', { method: 'POST', body: JSON.stringify({ eventId, eventSeatId }) }),
   mine: (eventId: string) => api<{ locks: Array<{ eventSeatId: string; ttl: number }> }>(`/locks/${eventId}`),
 };
+export interface CardInput { holder: string; number: string; expMonth: number; expYear: number; cvc: string }
+export const paymentsApi = {
+  checkout: (eventId: string, eventSeatIds: string[], card: CardInput) =>
+    api<{ orderId: string; total: number; authCode: string; seats: Array<{ eventSeatId: string; zone: string; row: string; number: number; price: number }> }>('/payments/checkout', { method: 'POST', body: JSON.stringify({ eventId, eventSeatIds, card }) }),
+};
