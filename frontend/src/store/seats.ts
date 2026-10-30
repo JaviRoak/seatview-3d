@@ -27,6 +27,8 @@ interface SeatsState {
   /** asiento en vista POV (resaltado, no reservado) */
   focused: number | null;
   ttls: Map<number, number>;
+  /** vencimiento absoluto (ms) de cada asiento propio; solo cambia al apartarlo o extenderlo */
+  expiresAt: Map<number, number>;
   dirty: Set<number>;
   repaintAll: boolean;
   load: (eventId: string, payload: EventSeatsPayload) => void;
@@ -52,18 +54,24 @@ export function buildSeatData(p: EventSeatsPayload): SeatData {
   };
 }
 
+/** Copia del mapa con el vencimiento de `idx` a `ttl` segundos desde ahora. */
+function withDeadline(m: Map<number, number>, idx: number, ttl: number): Map<number, number> {
+  const next = new Map(m); next.set(idx, Date.now() + ttl * 1000); return next;
+}
+
 export const useSeatsStore = create<SeatsState>((set, get) => ({
-  eventId: null, data: null, status: new Uint8Array(0), lockedBy: new Map(), version: 0, selected: [], hovered: null, focused: null, ttls: new Map(), dirty: new Set(), repaintAll: true,
+  eventId: null, data: null, status: new Uint8Array(0), lockedBy: new Map(), version: 0, selected: [], hovered: null, focused: null, ttls: new Map(), expiresAt: new Map(), dirty: new Set(), repaintAll: true,
 
   load: (eventId, payload) => {
     const lockedBy = new Map<number, string>();
     for (const [k, v] of Object.entries(payload.lockedBy)) lockedBy.set(Number(k), v);
-    set({ eventId, data: buildSeatData(payload), status: Uint8Array.from(payload.status), lockedBy, version: get().version + 1, selected: [], hovered: null, focused: null, ttls: new Map(), dirty: new Set(), repaintAll: true });
+    set({ eventId, data: buildSeatData(payload), status: Uint8Array.from(payload.status), lockedBy, version: get().version + 1, selected: [], hovered: null, focused: null, ttls: new Map(), expiresAt: new Map(), dirty: new Set(), repaintAll: true });
   },
 
   applyChanges: (changes, myUserId) => {
     const { data, status, lockedBy, selected, ttls, dirty } = get();
     if (!data) return;
+    let expiresAt = get().expiresAt;
     let selectedChanged = false;
     const nextSelected = [...selected];
     for (const c of changes) {
@@ -73,15 +81,16 @@ export const useSeatsStore = create<SeatsState>((set, get) => ({
       status[idx] = c.status;
       if (c.status === 1 && c.lockedBy) {
         lockedBy.set(idx, c.lockedBy);
-        if (c.lockedBy === myUserId && c.ttl !== undefined) ttls.set(idx, c.ttl);
+        if (c.lockedBy === myUserId && c.ttl !== undefined) { ttls.set(idx, c.ttl); expiresAt = withDeadline(expiresAt, idx, c.ttl); }
       } else {
         lockedBy.delete(idx);
         ttls.delete(idx);
+        if (expiresAt.has(idx)) { expiresAt = new Map(expiresAt); expiresAt.delete(idx); }
         const pos = nextSelected.indexOf(idx);
         if (pos >= 0) { nextSelected.splice(pos, 1); selectedChanged = true; } // perdí el asiento (expiró o se vendió)
       }
     }
-    set({ version: get().version + 1, lockedBy: new Map(lockedBy), ttls: new Map(ttls), ...(selectedChanged ? { selected: nextSelected } : {}) });
+    set({ version: get().version + 1, lockedBy: new Map(lockedBy), ttls: new Map(ttls), expiresAt, ...(selectedChanged ? { selected: nextSelected } : {}) });
   },
 
   setHovered: (idx) => {
@@ -100,16 +109,17 @@ export const useSeatsStore = create<SeatsState>((set, get) => ({
   },
   select: (idx, ttl) => {
     const ttls = new Map(get().ttls); ttls.set(idx, ttl); get().dirty.add(idx);
-    set({ selected: Array.from(new Set([...get().selected, idx])), ttls, version: get().version + 1 });
+    set({ selected: Array.from(new Set([...get().selected, idx])), ttls, expiresAt: withDeadline(get().expiresAt, idx, ttl), version: get().version + 1 });
   },
   deselect: (idx) => {
     const ttls = new Map(get().ttls); ttls.delete(idx); get().dirty.add(idx);
-    set({ selected: get().selected.filter((i) => i !== idx), ttls, version: get().version + 1 });
+    const expiresAt = new Map(get().expiresAt); expiresAt.delete(idx);
+    set({ selected: get().selected.filter((i) => i !== idx), ttls, expiresAt, version: get().version + 1 });
   },
-  clearSelection: () => { for (const i of get().selected) get().dirty.add(i); set({ selected: [], ttls: new Map(), version: get().version + 1 }); },
-  setTtl: (idx, ttl) => { const ttls = new Map(get().ttls); ttls.set(idx, ttl); set({ ttls }); },
+  clearSelection: () => { for (const i of get().selected) get().dirty.add(i); set({ selected: [], ttls: new Map(), expiresAt: new Map(), version: get().version + 1 }); },
+  setTtl: (idx, ttl) => { const ttls = new Map(get().ttls); ttls.set(idx, ttl); set({ ttls, expiresAt: withDeadline(get().expiresAt, idx, ttl) }); },
   markPainted: () => { get().dirty.clear(); set({ repaintAll: false }); },
-  reset: () => set({ eventId: null, data: null, status: new Uint8Array(0), lockedBy: new Map(), selected: [], hovered: null, focused: null, ttls: new Map(), version: 0, dirty: new Set(), repaintAll: true }),
+  reset: () => set({ eventId: null, data: null, status: new Uint8Array(0), lockedBy: new Map(), selected: [], hovered: null, focused: null, ttls: new Map(), expiresAt: new Map(), version: 0, dirty: new Set(), repaintAll: true }),
 }));
 
 /** Etiqueta legible: "Tribuna Este · Nivel 1 · Fila C · Asiento 12". */
