@@ -26,15 +26,8 @@ export const TEST_USERS = [
 
 export async function seed(targetSeats = Number(process.env.SEATS ?? 8000)) {
   console.log('→ Limpiando datos anteriores…');
-  await prisma.ticket.deleteMany();
-  await prisma.mediaAsset.deleteMany();
-  await prisma.eventSeat.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.event.deleteMany();
-  await prisma.seat.deleteMany();
-  await prisma.zone.deleteMany();
-  await prisma.venue.deleteMany();
-  await prisma.user.deleteMany();
+  // Con ~84.000 asientos, deleteMany fila a fila tarda minutos al repetir el seed; TRUNCATE vacía todo de una vez.
+  await prisma.$executeRawUnsafe('TRUNCATE "Ticket", "MediaAsset", "EventSeat", "Order", "Event", "Seat", "Zone", "Venue", "User" CASCADE');
 
   console.log('→ Usuarios de prueba');
   for (const u of TEST_USERS) {
@@ -84,6 +77,8 @@ export async function seed(targetSeats = Number(process.env.SEATS ?? 8000)) {
 
   // Algunas ventas previas en Platea de la Final para que el mapa muestre vendidos.
   const buyer = await prisma.user.findUniqueOrThrow({ where: { email: TEST_USERS[1].email } });
+  // Estadísticas frescas tras la carga masiva: sin ellas el planificador elige un plan lento para esta consulta.
+  await prisma.$executeRawUnsafe('ANALYZE "Seat", "EventSeat"');
   const sample = await prisma.eventSeat.findMany({ where: { eventId: FINAL_EVENT_ID, seat: { row: { not: 'GA' } } }, take: 40, skip: 120, orderBy: { seat: { idx: 'asc' } } });
   const order = await prisma.order.create({ data: { userId: buyer.id, eventId: FINAL_EVENT_ID, total: 0, status: 'PAID', cardLast4: '4242' } });
   await prisma.eventSeat.updateMany({ where: { id: { in: sample.map((s) => s.id) } }, data: { status: 'SOLD', orderId: order.id } });
