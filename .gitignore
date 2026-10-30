@@ -167,3 +167,6 @@ backend/uploads/*
 
 # Respaldos locales generados por los scripts de recintos
 backend/backups/
+
+# Iteraciones de trabajo de los modelos 3D (ver docs/adr/0001)
+frontend/public/models/wip/

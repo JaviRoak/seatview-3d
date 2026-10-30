@@ -17,6 +17,8 @@ export const locksApi = {
   acquire: (eventId: string, eventSeatId: string) => api<{ eventSeatId: string; ttl: number; renewed: boolean }>('/locks', { method: 'POST', body: JSON.stringify({ eventId, eventSeatId }) }),
   release: (eventId: string, eventSeatId: string) => api<{ released: boolean }>('/locks', { method: 'DELETE', body: JSON.stringify({ eventId, eventSeatId }) }),
   extend: (eventId: string, eventSeatId: string) => api<{ eventSeatId: string; ttl: number }>('/locks/extend', { method: 'POST', body: JSON.stringify({ eventId, eventSeatId }) }),
+  /** Zonas sin asiento: aparta `quantity` cupos de la zona. */
+  zone: (eventId: string, zoneId: string, quantity: number) => api<{ locks: Array<{ eventSeatId: string; ttl: number }> }>('/locks/zone', { method: 'POST', body: JSON.stringify({ eventId, zoneId, quantity }) }),
   mine: (eventId: string) => api<{ locks: Array<{ eventSeatId: string; ttl: number }> }>(`/locks/${eventId}`),
 };
 export interface CardInput { holder: string; number: string; expMonth: number; expYear: number; cvc: string }

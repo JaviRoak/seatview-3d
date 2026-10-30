@@ -36,6 +36,7 @@ Duracion de cada Sprint: 2 semanas.
 | frontend | React + Vite + Three.js (R3F): escena, generacion procedural del recinto, asientos con InstancedMesh |
 | backend | API Node.js/Express (TypeScript) + esquema Prisma; Socket.io y Redis en sprints siguientes |
 | docs | Diagramas UML, DER, anexos de Sprint 0 |
+| docs/adr | Registro de decisiones de arquitectura (ADR) |
 | LICENSE | MIT, codigo propio del equipo |
 | README.md | Este documento |
 
@@ -94,11 +95,24 @@ cp backend/.env.example backend/.env     # revisar DATABASE_URL, REDIS_URL y los
 cp frontend/.env.example frontend/.env   # VITE_API_URL y VITE_SOCKET_URL vacias: se usa el proxy de Vite
 npm ci                                   # instala frontend y backend (npm workspaces) y genera el cliente Prisma
 npm run db:migrate                       # aplica las migraciones
-npm run db:seed                          # estadio de ~8,500 asientos, eventos y usuarios de prueba
+npm run db:seed                          # 4 recintos con su evento y usuarios de prueba (unos 30 s)
 npm run dev                              # backend http://localhost:4000 y frontend http://localhost:5173
 ```
 
 Verificacion: `npm run typecheck`, `npm run build` y `npm test` (las pruebas del backend usan el PostgreSQL y el Redis de Docker). El CI corre los mismos pasos en cada pull request.
+
+Recintos que crea el seed (cupos y precios de prueba, no oficiales):
+
+| Evento | Recinto | Lugares | Destacado |
+|---|---|---|---|
+| Final Nacional de Futbol (`final-nacional-2026`) | Estadio Cuscatlan, modelo `cuscatlan-v5.glb` | 49,500 (3,000 numerados en Platea, el resto por zona) | Si |
+| Andrea Bocelli (`andrea-bocelli-magico-2026`) | Estadio Magico Gonzalez, `magico-concert.glb` | 11,285 | Si |
+| Beele (`beele-cuscatlan-2026`) | Estadio Cuscatlan, `cuscatlan-concert.glb` | 14,320 (4,820 sillas numeradas en cancha) | Si |
+| Concierto Sinfonico al Aire Libre | Estadio Cuscatlan Virtual (procedural) | ~8,500 | No |
+
+Los modelos 3D (.glb) son de elaboración propia del equipo. Ver [ADR 0001](docs/adr/0001-modelos-3d-y-recursos-binarios.md).
+
+Para crear un solo recinto sin borrar la base: `npm run venue:event -- cuscatlan|beele|bocelli` (no toca un evento que ya exista; `--dry-run` solo valida).
 
 Usuarios de prueba (los crea el seed):
 

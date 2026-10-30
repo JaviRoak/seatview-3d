@@ -1,0 +1,23 @@
+{
+  "venue": { "name": "Estadio Generado de Ejemplo", "city": "Santa Ana" },
+  "layout": {
+    "field": { "width": 100, "depth": 64 },
+    "corner": 0.3, "seatPitch": 0.8, "aisleAngle": 0.18,
+    "stands": ["Tribuna Este", "Tribuna Norte", "Tribuna Oeste", "Tribuna Sur"],
+    "levels": [
+      { "name": "Nivel 1", "rows": 6, "rowDepth": 0.85, "rowRise": 0.55, "baseHeight": 1.0, "baseOffset": 3.5 },
+      { "name": "Nivel 2", "rows": 4, "rowDepth": 0.85, "rowRise": 0.68, "baseHeight": 0, "baseOffset": 0 }
+    ]
+  },
+  "zones": [
+    { "key": "e1", "name": "Tribuna Este · Nivel 1",  "color": "#8ea3bf", "price": 40, "standIdx": 0, "levelIdx": 0 },
+    { "key": "n1", "name": "Tribuna Norte · Nivel 1", "color": "#9db59a", "price": 60, "standIdx": 1, "levelIdx": 0 },
+    { "key": "o1", "name": "Tribuna Oeste · Nivel 1", "color": "#b39aa8", "price": 40, "standIdx": 2, "levelIdx": 0 },
+    { "key": "s1", "name": "Tribuna Sur · Nivel 1",   "color": "#c2b18f", "price": 60, "standIdx": 3, "levelIdx": 0 },
+    { "key": "e2", "name": "Tribuna Este · Nivel 2",  "color": "#5b6d87", "price": 20, "standIdx": 0, "levelIdx": 1 },
+    { "key": "n2", "name": "Tribuna Norte · Nivel 2", "color": "#66805f", "price": 35, "standIdx": 1, "levelIdx": 1 },
+    { "key": "o2", "name": "Tribuna Oeste · Nivel 2", "color": "#7d6473", "price": 20, "standIdx": 2, "levelIdx": 1 },
+    { "key": "s2", "name": "Tribuna Sur · Nivel 2",   "color": "#8a7a5a", "price": 35, "standIdx": 3, "levelIdx": 1 }
+  ],
+  "events": [{ "name": "Partido amistoso", "date": "2026-11-20T18:30", "category": "FUTBOL" }]
+}
