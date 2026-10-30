@@ -46,7 +46,7 @@ export function MiniMap({ layout, zones, camera, focus }: Props) {
   return (
     <div className="card minimap" title="Vista superior del recinto" aria-label="Minimapa del evento">
       <svg viewBox="0 0 150 108" role="img" aria-label={layout.concert?'Mapa del concierto con escenario y posición de la cámara':'Mapa del estadio y posición de la cámara'}>
-        <rect x="0" y="0" width="150" height="108" rx="8" fill="rgba(255,255,255,0.03)" />
+        <rect x="0" y="0" width="150" height="108" fill="rgba(255,255,255,0.03)" />
         {layout.model&&<ellipse cx="75" cy="54" rx="69" ry="49" fill="#566171" fillOpacity=".25"/>}
         {bands.map((b) => <path key={b.key} d={b.d} fill={b.color} fillOpacity="0.55" stroke="rgba(0,0,0,0.25)" strokeWidth="0.5" />)}
         {layout.concert?<>
@@ -59,8 +59,8 @@ export function MiniMap({ layout, zones, camera, focus }: Props) {
           <rect x={sx(-layout.field.width / 2)} y={sz(-layout.field.depth / 2)} width={(layout.field.width / W) * 150} height={(layout.field.depth / H) * 108} fill="#2f7d47" rx="1" />
           <line x1={sx(0)} y1={sz(-layout.field.depth / 2)} x2={sx(0)} y2={sz(layout.field.depth / 2)} stroke="rgba(255,255,255,0.5)" strokeWidth="0.6" />
         </>}
-        {focus && <circle cx={sx(focus.x)} cy={sz(focus.z)} r="3" fill="#ffb020" stroke="#1a1200" strokeWidth="0.8" />}
-        {camera && <circle cx={sx(Math.max(-W / 2, Math.min(W / 2, camera.x)))} cy={sz(Math.max(-H / 2, Math.min(H / 2, camera.z)))} r="3.2" fill="#ffffff" stroke="#0d1626" strokeWidth="1" />}
+        {focus && <circle cx={sx(focus.x)} cy={sz(focus.z)} r="3" fill="#ffd60a" stroke="#0b0b0a" strokeWidth="0.8" />}
+        {camera && <circle cx={sx(Math.max(-W / 2, Math.min(W / 2, camera.x)))} cy={sz(Math.max(-H / 2, Math.min(H / 2, camera.z)))} r="3.2" fill="#ffffff" stroke="#0b0b0a" strokeWidth="1" />}
       </svg>
     </div>
   );

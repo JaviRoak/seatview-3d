@@ -1,5 +1,6 @@
 import type {ReactNode} from 'react';
 import type {Direction} from '../../scene/seatNavigation';
+import {Icon} from '../../components/Icon';
 
 /** Shared presentation for assigned seats and unassigned zone previews. */
 export function PreviewCard({title,subtitle,quality,description,stats,children}:{
@@ -8,7 +9,7 @@ export function PreviewCard({title,subtitle,quality,description,stats,children}:
 }){
   return <section className="card" aria-label="Vista previa de la localidad">
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
-      <span className="badge preview">Vista previa</span>{quality}
+      <span className="preview-tag"><span className="badge preview">Vista previa</span><span>Mirar no aparta el lugar.</span></span>{quality}
     </div>
     {description&&<div className="muted" style={{fontSize:'.8rem',marginTop:'.35rem'}}>{description}</div>}
     <h2 style={{margin:'.6rem 0 0',fontSize:'1.45rem'}}>{title}</h2>
@@ -20,10 +21,10 @@ export function PreviewCard({title,subtitle,quality,description,stats,children}:
 
 export function PreviewNavigation({canMove,onMove,onExit}:{canMove:(d:Direction)=>boolean;onMove:(d:Direction)=>void;onExit:()=>void}){
   return <div className="pov-nav" aria-label="Moverse a posiciones cercanas">
-    <button disabled={!canMove('left')} onClick={()=>onMove('left')}>◀ Al lado</button>
-    <button disabled={!canMove('front')} onClick={()=>onMove('front')}>▲ Adelante</button>
-    <button disabled={!canMove('right')} onClick={()=>onMove('right')}>Al lado ▶</button>
-    <button className="wide" disabled={!canMove('back')} onClick={()=>onMove('back')}>▼ Fila atrás</button>
+    <button aria-label="Al lado, a la izquierda" disabled={!canMove('left')} onClick={()=>onMove('left')}><Icon name="left" size={14}/>Al lado</button>
+    <button disabled={!canMove('front')} onClick={()=>onMove('front')}><Icon name="up" size={14}/>Adelante</button>
+    <button aria-label="Al lado, a la derecha" disabled={!canMove('right')} onClick={()=>onMove('right')}>Al lado<Icon name="right" size={14}/></button>
+    <button className="wide" disabled={!canMove('back')} onClick={()=>onMove('back')}><Icon name="down" size={14}/>Fila atrás</button>
     <button className="wide btn-ghost" onClick={onExit}>Volver a la vista general</button>
   </div>;
 }

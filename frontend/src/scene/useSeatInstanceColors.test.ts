@@ -72,7 +72,7 @@ describe('shared chair highlighting', () => {
       useSeatsStore.getState().select(1, 300);
       useSeatsStore.getState().setHovered(4);
     });
-    expect([colorAt(0), colorAt(1), colorAt(2)]).toEqual([0xffb020, 0x4b5563, 0x4a1d21]);
+    expect([colorAt(0), colorAt(1), colorAt(2)]).toEqual([0xffd60a, 0x77776d, 0x3a3934]);
     act(() => useSeatsStore.getState().applyChanges([{ eventSeatId: 'table1', status: 0 }], 'me'));
     expect(colorAt(0)).toBe(0x204060);
   });
@@ -84,9 +84,9 @@ describe('shared chair highlighting', () => {
     const paint = vi.spyOn(mesh, 'setColorAt');
     act(() => useSeatsStore.getState().setHovered(2));
     expect(paint).not.toHaveBeenCalled();
-    expect(colorAt(0)).toBe(0x4b5563);
+    expect(colorAt(0)).toBe(0x77776d);
     act(() => useAuthStore.setState({ user: { id: 'me', name: 'Test', email: 'test@example.test', role: 'USER' } }));
-    expect(colorAt(0)).toBe(0xffb020);
+    expect(colorAt(0)).toBe(0xffd60a);
   });
 
   it('also supports the unfiltered renderer used by other events', () => {

@@ -102,7 +102,7 @@ export function ZoneEventPage({event}:{event:EventDetail}){
     {pov&&focused!==null?<SeatCard event={event} idx={focused} busy={busy} onReserve={i=>void reserve(i)} onRelease={i=>void release([i])} onMove={sit} onExit={exitPov}/>
       :pov?<ZonePreviewCard event={event} zone={zone} position={pov} points={map.points} quantity={quantity} onQuantity={setQuantity} available={counts.available} busy={busy} onReserve={()=>void reserve()} onMove={setPov} onExit={exitPov}/>
       :<section className="card card-tight">
-      <label htmlFor="event-zone">Elige tu zona</label>
+      <label htmlFor="event-zone" className="panel-title">Elige tu zona</label>
       <p className="notice" role="status" style={{margin:'.4rem 0'}}>{pov?'Estás en el punto elegido. Arrastra para mirar alrededor.':hoveredZone===null?`Haz clic en ${concert?'una silla o grada para ver el escenario':'una grada para ver la cancha'} desde ese punto.`:`${event.venue.zones[hoveredZone].name} · Clic para ver desde aquí`}</p>
       <select id="event-zone" value={zone} onChange={e=>chooseZone(Number(e.target.value))} style={{width:'100%',margin:'.5rem 0'}}>{event.venue.zones.map((z,i)=>concert&&z.capacity===0?null:<option key={z.id} value={i}>{z.name}</option>)}</select>
       <div style={{display:'flex',justifyContent:'space-between',gap:'.5rem',flexWrap:'wrap'}}><strong>${current.price.toFixed(2)} / entrada{bocelli?' · prueba':''}</strong><span>{counts.available.toLocaleString('es')} disponibles</span></div>
@@ -110,7 +110,7 @@ export function ZoneEventPage({event}:{event:EventDetail}){
       {current.generalAdmission?<>
         <p>Acceso a gradas corridas. No incluye un asiento ni una ubicación asignada.</p>
         <label htmlFor="zone-quantity">Cantidad de entradas</label><input id="zone-quantity" type="number" min="1" max="6" value={quantity} onChange={e=>setQuantity(Number(e.target.value))} style={{width:'100%',margin:'.5rem 0'}}/>
-        <button className="btn-primary btn-lg" disabled={busy||!Number.isInteger(quantity)||quantity<1||quantity>6||quantity>counts.available} onClick={()=>void reserve()}>{busy?'Apartando…':`Apartar ${quantity} ${quantity===1?'entrada':'entradas'}`}</button>
+        <button className="btn-primary btn-lg" disabled={busy||!Number.isInteger(quantity)||quantity<1||quantity>6||quantity>counts.available} onClick={()=>void reserve()}>{busy?'Apartando…':`Apartar ${quantity} ${quantity===1?'entrada':'entradas'} · $${(current.price*quantity).toFixed(2).replace(/\.00$/,'')}`}</button>
         <p className="notice">Explora la vista; el punto que mires no se reserva.</p><div className="row-actions">{[['Baja',.15],['Media',.5],['Alta',.85]].map(([name,f])=><button key={String(name)} className="btn" onClick={()=>explore(Number(f))}>Vista {name}</button>)}</div>
       </>:<>
         <p>{beele?zone<2?'Sillas en mesas numeradas. El precio corresponde a una silla.':'VIP con sillas numeradas en bloques A–F.':bocelli?'Sillas numeradas de prueba en bloques A–D.':'Platea con lugares numerados.'} Elige una silla en el modelo o en la lista.</p>

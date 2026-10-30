@@ -56,18 +56,18 @@ describe('clic en cancha → silla real → apartado',()=>{
     fireEvent.click(screen.getByRole('button',{name:'Apartar este asiento'}));
     await waitFor(()=>expect(locksApi.acquire).toHaveBeenCalledWith(event.id,id));
     expect(await screen.findByRole('button',{name:'Quitar de mi reserva'})).toBeInTheDocument();
-    expect(screen.getByRole('button',{name:'Pagar ahora'})).toBeInTheDocument();
+    expect(screen.getByRole('button',{name:/^Pagar \$/})).toBeInTheDocument();
   });
   it('no habilita el apartado si la silla más cercana ya está vendida',async()=>{
     vi.mocked(eventsApi.seats).mockResolvedValue({...payload,status:[0,2,0,0,0,0,0]});
     await open();fireEvent.click(screen.getByRole('button',{name:'Clic en Ultra Platinum'}));
     expect(screen.getByRole('button',{name:'Apartar este asiento'})).toBeDisabled();
-    expect(screen.getByText('Este asiento ya fue vendido')).toBeInTheDocument();expect(locksApi.acquire).not.toHaveBeenCalled();
+    expect(screen.getByText(/^Vendido. Prueba el de al lado/)).toBeInTheDocument();expect(locksApi.acquire).not.toHaveBeenCalled();
   });
   it('conserva el apartado por cantidad en gradas sin inventar un asiento',async()=>{
     await open();fireEvent.click(screen.getByRole('button',{name:'Clic en grada'}));
     expect(useSeatsStore.getState().focused).toBeNull();expect(screen.queryByText('9876')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button',{name:'Apartar 1 entrada'}));
+    fireEvent.click(screen.getByRole('button',{name:/^Apartar 1 entrada/}));
     await waitFor(()=>expect(locksApi.zone).toHaveBeenCalledWith(event.id,'z3',1));expect(locksApi.acquire).not.toHaveBeenCalled();
   });
 });

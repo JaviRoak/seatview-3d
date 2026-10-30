@@ -127,7 +127,7 @@ export function EventPage() {
   return (
     <div className="event-layout">
       <SeatScene layout={event.venue.layout} pov={pov} debug={debug} quality={quality} onSelect={sitAt} onHover={onHover} onFps={setFps} onCameraMove={onCameraMove} onPovReady={onPovReady} />
-      {hint && <div className="card card-tight look-hint" role="status">Arrastra para mirar alrededor · rueda para acercar la vista</div>}
+      {hint && <div className="card card-tight look-hint" role="status">Arrastra para mirar alrededor · usa las flechas de la tarjeta para moverte</div>}
 
       {tooltip && data && !pov && (
         <div className="tooltip" style={{ left: tooltip.x + 14, top: tooltip.y + 14 }}>
@@ -154,7 +154,7 @@ export function EventPage() {
         {pov && focusIdx !== null ? (
           <SeatCard event={event} idx={focusIdx} busy={busy} onReserve={reserve} onRelease={release} onMove={sitAt} onExit={exitPov} />
         ) : (
-          <div className="card card-tight notice">Pasa el cursor sobre un asiento para ver sus datos y haz clic para sentarte en él. Desde ahí podrás apartarlo.</div>
+          <div className="card card-tight"><h3 style={{ margin: '0 0 4px' }}>Elige tu asiento</h3><p className="notice" style={{ margin: 0 }}>Toca un asiento en el estadio para ver la cancha desde ahí. Mirar no lo aparta.</p></div>
         )}
         <ReservationCard onRelease={release} onGoTo={sitAt} onCheckout={() => navigate(`/eventos/${event.id}/pago`)} />
       </aside>

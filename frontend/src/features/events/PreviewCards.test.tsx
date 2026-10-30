@@ -18,7 +18,7 @@ describe('interfaz compartida de vista previa',()=>{
     render(<SeatCard event={event} idx={0} busy={false} onReserve={reserve} onRelease={vi.fn()} onMove={move} onExit={exit}/>);
     expect(screen.getByLabelText('Vista previa de la localidad')).toBeInTheDocument();
     expect(screen.getByText('Mesa')).toBeInTheDocument();expect(screen.getByText('$95')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button',{name:'Al lado ▶'}));expect(move).toHaveBeenCalledWith(1);expect(reserve).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button',{name:'Al lado, a la derecha'}));expect(move).toHaveBeenCalledWith(1);expect(reserve).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button',{name:'Apartar este asiento'}));expect(reserve).toHaveBeenCalledWith(0);
     fireEvent.click(screen.getByRole('button',{name:'Volver a la vista general'}));expect(exit).toHaveBeenCalled();
     act(()=>useSeatsStore.getState().select(0,300));expect(screen.getByRole('button',{name:'Quitar de mi reserva'})).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe('interfaz compartida de vista previa',()=>{
     useSeatsStore.getState().select(3,300);
     render(<ReservationCard onRelease={vi.fn()} onCheckout={vi.fn()} onGoTo={vi.fn()}/>);
     expect(screen.getByText('1 entrada apartada')).toBeInTheDocument();expect(screen.queryByText(/12345/)).not.toBeInTheDocument();
-    expect(screen.getByRole('button',{name:'Pagar ahora'})).toBeInTheDocument();
+    expect(screen.getByRole('button',{name:/^Pagar \$/})).toBeInTheDocument();
   });
   it('el minimapa está visible de inicio y representa el escenario del concierto',()=>{
     render(<MiniMap layout={event.venue.layout} zones={event.venue.zones} camera={{x:0,z:0}} focus={{x:-20,z:5}}/>);
