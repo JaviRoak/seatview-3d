@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { reservationFrom, useReservationStore } from './reservation';
 import { useSeatsStore } from './seats';
 import type { EventSeatsPayload } from '../api/types';
@@ -11,9 +11,10 @@ const payload: EventSeatsPayload = {
 
 describe('reserva visible en todas las pantallas', () => {
   beforeEach(() => { useSeatsStore.getState().reset(); useReservationStore.getState().set(null); });
+  afterEach(() => { vi.useRealTimers(); });
 
   it('calcula conteo, total y el vencimiento del asiento que vence primero', () => {
-    const r = reservationFrom('ev1', [0, 1], new Map([[0, 300], [1, 120]]), (i) => [60, 25][i], 1_000);
+    const r = reservationFrom('ev1', [0, 1], new Map([[0, 301_000], [1, 121_000]]), (i) => [60, 25][i]);
     expect(r).toEqual({ eventId: 'ev1', count: 2, total: 85, expiresAt: 121_000 });
     expect(reservationFrom('ev1', [], new Map(), () => 0)).toBeNull();
   });
@@ -32,5 +33,19 @@ describe('reserva visible en todas las pantallas', () => {
     useSeatsStore.getState().select(0, 300);
     useSeatsStore.getState().load('ev2', { ...payload, eventId: 'ev2' });
     expect(useReservationStore.getState().current?.eventId).toBe('ev1');
+  });
+
+  it('el vencimiento no se reinicia con eventos ajenos ni al apartar otro asiento', () => {
+    vi.useFakeTimers(); vi.setSystemTime(0);
+    useSeatsStore.getState().load('ev1', payload);
+    useSeatsStore.getState().select(0, 300);
+    vi.setSystemTime(200_000);
+    useSeatsStore.getState().applyChanges([{ eventSeatId: 'b', status: 1, lockedBy: 'otro' }], 'yo');
+    expect(useReservationStore.getState().current?.expiresAt).toBe(300_000);
+    useSeatsStore.getState().applyChanges([{ eventSeatId: 'b', status: 0 }], 'yo');
+    useSeatsStore.getState().select(1, 300);
+    expect(useReservationStore.getState().current?.expiresAt).toBe(300_000);
+    useSeatsStore.getState().setTtl(0, 300); // extender renueva aunque el TTL sea el mismo
+    expect(useReservationStore.getState().current?.expiresAt).toBe(500_000);
   });
 });

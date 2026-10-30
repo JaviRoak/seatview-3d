@@ -1,7 +1,7 @@
 /**
  * Reserva en curso, visible en todas las pantallas (chip del encabezado).
- * Se deriva del store de asientos: cada vez que cambian los asientos apartados
- * o sus TTL se recalcula el vencimiento absoluto. Se guarda en localStorage
+ * Se deriva del store de asientos: usa el vencimiento absoluto de cada asiento,
+ * que solo cambia al apartarlo o extenderlo (no con cada evento del socket). Se guarda en localStorage
  * para que el chip sobreviva a una recarga; el servidor sigue siendo la fuente
  * de verdad y `refresh` la confirma con GET /locks/:eventId.
  */
@@ -42,16 +42,16 @@ export const useReservationStore = create<ReservationState>((set, get) => ({
   },
 }));
 
-/** Vencimiento absoluto a partir de los TTL en segundos del store de asientos. */
-export function reservationFrom(eventId: string | null, selected: number[], ttls: Map<number, number>, price: (i: number) => number, now = Date.now()): Reservation | null {
+/** La reserva vence cuando vence el primero de sus asientos. */
+export function reservationFrom(eventId: string | null, selected: number[], expiresAt: Map<number, number>, price: (i: number) => number): Reservation | null {
   if (!eventId || !selected.length) return null;
-  return { eventId, count: selected.length, total: selected.reduce((a, i) => a + price(i), 0), expiresAt: now + Math.min(...selected.map((i) => ttls.get(i) ?? 0)) * 1000 };
+  return { eventId, count: selected.length, total: selected.reduce((a, i) => a + price(i), 0), expiresAt: Math.min(...selected.map((i) => expiresAt.get(i) ?? 0)) };
 }
 
 useSeatsStore.subscribe((s, prev) => {
-  if (s.selected === prev.selected && s.ttls === prev.ttls) return;
+  if (s.selected === prev.selected && s.expiresAt === prev.expiresAt) return;
   const current = useReservationStore.getState().current;
   // Cargar otro evento vacía la selección local, pero no libera la reserva de su evento en el servidor.
   if (!s.selected.length && current && current.eventId !== s.eventId) return;
-  useReservationStore.getState().set(reservationFrom(s.eventId, s.selected, s.ttls, (i) => s.data?.zones[s.data.zoneIdx[i]]?.price ?? 0));
+  useReservationStore.getState().set(reservationFrom(s.eventId, s.selected, s.expiresAt, (i) => s.data?.zones[s.data.zoneIdx[i]]?.price ?? 0));
 });
