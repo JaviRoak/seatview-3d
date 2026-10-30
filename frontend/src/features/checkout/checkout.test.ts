@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cardBrand, cardErrors, formatCardNumber, formatExpiry, luhn } from './CheckoutPage';
+import { cardBrand, cardErrors, formatCardNumber, formatExpiry, holdState, luhn } from './CheckoutPage';
 import { authErrors, passwordScore } from '../auth/LoginPage';
 
 describe('validación de tarjeta (Luhn)', () => {
@@ -38,5 +38,19 @@ describe('inicio de sesión', () => {
     expect(passwordScore('')).toBe(0);
     expect(passwordScore('abcdefgh')).toBe(1);
     expect(passwordScore('Andres12345!')).toBe(4);
+  });
+});
+
+describe('tiempo de reserva en el pago', () => {
+  const r = { eventId: 'ev1', count: 1, total: 10, expiresAt: 60_000 };
+  it('cuenta el tiempo de la reserva de este evento', () => {
+    expect(holdState(r, 'ev1', true, 30_000)).toEqual({ left: 30_000, expired: false });
+    expect(holdState(r, 'ev1', true, 61_000)).toEqual({ left: 0, expired: true });
+  });
+  it('sigue vencida cuando el encabezado ya borró la reserva', () => {
+    expect(holdState(null, 'ev1', true, 61_000)).toEqual({ left: 0, expired: true });
+  });
+  it('sin asientos apartados no muestra el aviso de vencida', () => {
+    expect(holdState(null, 'ev1', false)).toEqual({ left: 0, expired: false });
   });
 });

@@ -12,7 +12,7 @@ import { ApiError } from '../../api/client';
 import type { EventDetail } from '../../api/types';
 import { seatLabel, useSeatsStore } from '../../store/seats';
 import { useAuthStore } from '../../store/auth';
-import { useReservationStore } from '../../store/reservation';
+import { useReservationStore, type Reservation } from '../../store/reservation';
 import { TicketCard } from '../../components/TicketCard';
 import { Icon } from '../../components/Icon';
 import { clock } from '../../components/TopBar';
@@ -42,6 +42,15 @@ export function cardErrors(c: CardForm, now = new Date()) {
   if (!mm || mm > 12 || Number.isNaN(yy) || yy === undefined || yy < nowY || (yy === nowY && mm < nowM)) e.exp = 'Usa una fecha futura en formato MM/AA.';
   if (!/^\d{3,4}$/.test(c.cvc)) e.cvc = '3 o 4 dígitos al reverso.';
   return e;
+}
+
+/**
+ * Tiempo que le queda a la reserva de este evento. Sin reserva cuenta como vencida:
+ * el encabezado la borra apenas vence, pero los asientos siguen en la selección.
+ */
+export function holdState(reservation: Reservation | null, eventId: string | undefined, hasSeats: boolean, now = Date.now()) {
+  const left = reservation && reservation.eventId === eventId ? Math.max(0, reservation.expiresAt - now) : 0;
+  return { left, expired: hasSeats && left === 0 };
 }
 
 type Result = { orderId: string; total: number; tickets: Array<{ id: string; qrData: string; eventSeatId: string }> };
@@ -81,8 +90,7 @@ export function CheckoutPage() {
   }, [eventId, user]);
 
   const total = useMemo(() => (data ? selected.reduce((a, i) => a + (data.zones[data.zoneIdx[i]]?.price ?? 0), 0) : 0), [data, selected]);
-  const left = reservation && reservation.eventId === eventId ? Math.max(0, reservation.expiresAt - now) : 0;
-  const expired = selected.length > 0 && reservation?.eventId === eventId && left === 0;
+  const { left, expired } = holdState(reservation, eventId, selected.length > 0, now);
   const errors = tried ? cardErrors(card) : {};
 
   const extend = async () => {
