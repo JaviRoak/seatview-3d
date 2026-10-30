@@ -9,8 +9,8 @@ import { BOCELLI_REFERENCE, BOCELLI_SOURCE, BOCELLI_TARGET, BOCELLI_ZONES, bocel
 import { assertUniqueSeats, createVenueWithEvent, generalAdmission, readModel, type SeatRow } from './inventory';
 
 export const BOCELLI_EVENT_ID = 'andrea-bocelli-magico-2026';
-// Póster provisional: se reemplaza por un archivo en frontend/public/models cuando esté disponible.
-const COVER = 'https://blobsmartticket.blob.core.windows.net/eventos/7566B_1528.jpg';
+// Póster guardado en el repo, sin enlaces a servidores ajenos (docs/adr/0001).
+const COVER = '/models/bocelli-event.jpg';
 
 export function buildBocelli() {
   const stadium = readModel('magico-seating.json');
