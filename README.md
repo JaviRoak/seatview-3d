@@ -36,6 +36,7 @@ Duracion de cada Sprint: 2 semanas.
 | frontend | React + Vite + Three.js (R3F): escena, generacion procedural del recinto, asientos con InstancedMesh |
 | backend | API Node.js/Express (TypeScript) + esquema Prisma; Socket.io y Redis en sprints siguientes |
 | docs | Diagramas UML, DER, anexos de Sprint 0 |
+| docs/adr | Registro de decisiones de arquitectura (ADR) |
 | LICENSE | MIT, codigo propio del equipo |
 | README.md | Este documento |
 
@@ -108,6 +109,8 @@ Recintos que crea el seed (cupos y precios de prueba, no oficiales):
 | Andrea Bocelli (`andrea-bocelli-magico-2026`) | Estadio Magico Gonzalez, `magico-concert.glb` | 11,285 | Si |
 | Beele (`beele-cuscatlan-2026`) | Estadio Cuscatlan, `cuscatlan-concert.glb` | 14,320 (4,820 sillas numeradas en cancha) | Si |
 | Concierto Sinfonico al Aire Libre | Estadio Cuscatlan Virtual (procedural) | ~8,500 | No |
+
+Los modelos 3D (.glb) son de elaboración propia del equipo. Ver [ADR 0001](docs/adr/0001-modelos-3d-y-recursos-binarios.md).
 
 Para crear un solo recinto sin borrar la base: `npm run venue:event -- cuscatlan|beele|bocelli` (no toca un evento que ya exista; `--dry-run` solo valida).
 
