@@ -1,7 +1,7 @@
 /** Tipos compartidos con la API (espejo de las respuestas del backend). */
 export interface AuthUser { id: string; email: string; name: string; role: 'USER' | 'ADMIN' }
 export type EventCategory = 'FUTBOL' | 'CONCIERTO' | 'OTRO';
-export interface EventSummary { id: string; name: string; description: string | null; date: string; category: EventCategory; coverImageUrl: string | null; venue: { id: string; name: string; city: string }; totalSeats: number; soldSeats: number }
+export interface EventSummary { id: string; name: string; description: string | null; date: string; category: EventCategory; coverImageUrl: string | null; featured: boolean; venue: { id: string; name: string; city: string }; totalSeats: number; soldSeats: number }
 export interface Zone { id: string; name: string; color: string; price: number; generalAdmission?: boolean; capacity?: number }
 export interface LevelSpec { name: string; rows: number; rowDepth: number; rowRise: number; baseHeight: number; baseOffset: number }
 export interface VenueModel { url: string; radius: number; height: number; seatingFootprint: { width: number; depth: number } }

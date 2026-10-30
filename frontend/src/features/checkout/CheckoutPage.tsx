@@ -120,6 +120,7 @@ export function CheckoutPage() {
       <span className="eyebrow">Paso final</span>
       <h1>Pago</h1>
       {event && <p className="muted"><span className={`badge cat-${event.category}`}>{CATEGORY_LABEL[event.category]}</span> &nbsp;{event.name} · {new Date(event.date).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short' })}</p>}
+      {event?.venue.layout.concert?.kind==='bocelli'&&<p className="notice" role="note">Compra de demostración: importes y cupos de prueba. El plano provisional de Maná no representa la distribución oficial del concierto de Bocelli.</p>}
       {error && <div className="error">{error}</div>}
       {!data || selected.length === 0 ? (
         <div className="card"><p>No tienes entradas reservadas para este evento.</p><Link to={`/eventos/${eventId}`}>Volver al mapa 3D</Link></div>
