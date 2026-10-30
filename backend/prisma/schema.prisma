@@ -109,6 +109,8 @@ model Event {
   category      EventCategory @default(OTRO)
   /// Imagen de cabecera subida por un administrador; null → SVG procedural (EventCover)
   coverImageUrl String?
+  /// Destacado en el cartel de la página de eventos; los no destacados van al final de la agenda
+  featured      Boolean       @default(false)
   eventSeats    EventSeat[]
   orders        Order[]
 

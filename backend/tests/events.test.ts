@@ -28,6 +28,14 @@ describe('GET /api/events', () => {
     expect(ev.venue).toMatchObject({ id: fx.venue.id, name: fx.venue.name });
     expect(ev.totalSeats).toBe(5);
     expect(ev.soldSeats).toBe(0);
+    expect(ev.featured).toBe(false);
+  });
+  it('minPrice es la zona más barata con lugares; ignora zonas vacías', async () => {
+    const empty = await prisma.zone.create({ data: { venueId: fx.venue.id, name: 'Palco cerrado', color: '#000000', price: 1 } });
+    try {
+      const r = await request(app).get('/api/events');
+      expect(r.body.events.find((e: { id: string }) => e.id === fx.event.id).minPrice).toBe(10);
+    } finally { await prisma.zone.delete({ where: { id: empty.id } }); }
   });
 });
 

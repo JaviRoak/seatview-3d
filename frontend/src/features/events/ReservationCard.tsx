@@ -1,6 +1,7 @@
 /** Carrito de reservas: asientos apartados uno a uno, cuenta regresiva y pago. */
 import { Countdown } from '../../components/Countdown';
 import { seatLabel, useSeatsStore } from '../../store/seats';
+import { Icon } from '../../components/Icon';
 
 export function ReservationCard({ onRelease, onCheckout, onGoTo,busy=false }: { onRelease: (idx: number) => void; onCheckout: () => void; onGoTo: (idx: number) => void;busy?:boolean }) {
   const data = useSeatsStore((s) => s.data);
@@ -14,7 +15,7 @@ export function ReservationCard({ onRelease, onCheckout, onGoTo,busy=false }: { 
   return (
     <div className="card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div><span className="eyebrow">Tu reserva</span><div className="muted" style={{ fontSize: '0.8rem' }}>{selected.length} {selected.length === 1 ? 'entrada apartada' : 'entradas apartadas'}</div></div>
+        <div><h3 style={{ margin: 0 }}>Tu reserva</h3><div className="muted" style={{ fontSize: '0.8rem' }}>{selected.length} {selected.length === 1 ? 'entrada apartada' : 'entradas apartadas'}</div></div>
         <Countdown seconds={minTtl} />
       </div>
       {selected.map((i) => (
@@ -23,11 +24,11 @@ export function ReservationCard({ onRelease, onCheckout, onGoTo,busy=false }: { 
             <span className="zone-chip" style={{ background: data.zones[data.zoneIdx[i]]?.color }} />{seatLabel(data, i)}
           </button>
           <span>${price(i).toFixed(2)}</span>
-          <button className="btn-ghost btn-icon" disabled={busy} onClick={() => onRelease(i)} title="Quitar de la reserva" aria-label="Quitar">×</button>
+          <button className="btn-ghost btn-icon" disabled={busy} onClick={() => onRelease(i)} title="Quitar de la reserva" aria-label="Quitar"><Icon name="close" size={14} /></button>
         </div>
       ))}
       <div className="total"><span>Total</span><span>${total.toFixed(2)}</span></div>
-      <div className="row-actions"><button className="btn-primary" disabled={busy} onClick={onCheckout}>Pagar ahora</button></div>
+      <button className="btn-primary btn-lg" style={{ marginTop: 12 }} disabled={busy} onClick={onCheckout}><span>Pagar ${total.toFixed(2).replace(/\.00$/, '')}</span><Icon name="arrow" /></button>
     </div>
   );
 }

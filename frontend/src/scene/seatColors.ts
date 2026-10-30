@@ -5,7 +5,7 @@
 export const SeatStatus = { AVAILABLE: 0, LOCKED: 1, SOLD: 2 } as const;
 export type SeatStatusCode = 0 | 1 | 2;
 export interface SeatVisualState { status: SeatStatusCode; mine: boolean; hovered: boolean; selected: boolean; focused?: boolean }
-export const COLORS = { lockedOther: '#4b5563', lockedMine: '#ffb020', sold: '#4a1d21', focus: '#ffffff', hoverBoost: 0.28 };
+export const COLORS = { lockedOther: '#77776d', lockedMine: '#ffd60a', sold: '#3a3934', focus: '#ffffff', hoverBoost: 0.28 };
 
 export function seatColorHex(state: SeatVisualState, zoneColor: string): number {
   let base: string;

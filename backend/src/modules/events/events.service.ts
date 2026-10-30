@@ -9,9 +9,13 @@ export async function listEvents() {
   });
   const sold = await prisma.eventSeat.groupBy({ by: ['eventId'], where: { status: 'SOLD' }, _count: { _all: true } });
   const soldByEvent = new Map(sold.map((s) => [s.eventId, s._count._all]));
+  // Precio "desde": la zona más barata que tiene lugares (las zonas sin inventario, como palcos cerrados, no cuentan).
+  const zones = await prisma.zone.findMany({ where: { venueId: { in: events.map((e) => e.venueId) }, seats: { some: {} } }, select: { venueId: true, price: true } });
+  const minPrice = new Map<string, number>();
+  for (const z of zones) minPrice.set(z.venueId, Math.min(minPrice.get(z.venueId) ?? Infinity, Number(z.price)));
   return events.map((e) => ({
-    id: e.id, name: e.name, description: e.description, date: e.date, category: e.category, coverImageUrl: e.coverImageUrl, venue: e.venue,
-    totalSeats: e._count.eventSeats, soldSeats: soldByEvent.get(e.id) ?? 0,
+    id: e.id, name: e.name, description: e.description, date: e.date, category: e.category, coverImageUrl: e.coverImageUrl, featured: e.featured, venue: e.venue,
+    totalSeats: e._count.eventSeats, soldSeats: soldByEvent.get(e.id) ?? 0, minPrice: minPrice.get(e.venueId) ?? null,
   }));
 }
 
@@ -20,7 +24,7 @@ export async function getEvent(eventId: string) {
   if (!event) throw notFound('Evento no encontrado');
   const inventory = await prisma.seat.groupBy({ by: ['zoneId', 'row'], where: { venueId: event.venueId }, _count: { _all: true } });
   return {
-    id: event.id, name: event.name, description: event.description, date: event.date, category: event.category, coverImageUrl: event.coverImageUrl,
+    id: event.id, name: event.name, description: event.description, date: event.date, category: event.category, coverImageUrl: event.coverImageUrl, featured: event.featured,
     venue: {
       id: event.venue.id, name: event.venue.name, city: event.venue.city, imageUrl: event.venue.imageUrl, layout: event.venue.layout,
       zones: event.venue.zones.map((z) => ({ id: z.id, name: z.name, color: z.color, price: Number(z.price), generalAdmission: inventory.some(g => g.zoneId === z.id && g.row === 'GA'), capacity: inventory.filter(g => g.zoneId === z.id).reduce((n,g) => n+g._count._all,0) })),
