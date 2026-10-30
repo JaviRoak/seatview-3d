@@ -16,5 +16,6 @@ describe('EventCover', () => {
     expect(img).not.toBeNull();
     expect(img.getAttribute('src')).toBe(resolveImageUrl('/uploads/abc.png'));
     expect(resolveImageUrl('https://cdn.x/y.png')).toBe('https://cdn.x/y.png');
+    expect(resolveImageUrl('/models/cuscatlan-event.png')).toBe('/models/cuscatlan-event.png');
   });
 });
