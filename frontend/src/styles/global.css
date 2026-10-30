@@ -215,6 +215,36 @@ label { display: block; font-size: 12px; color: color-mix(in srgb, var(--text) 7
   .card-grid { grid-template-columns: 1fr; }
   .stat-row { grid-template-columns: repeat(3, 1fr); }
 }
+/* Vista del recinto: misma estructura, paleta y bordes del rediseño v3 */
+.hud-tl .card, .hud-tr .card, .hud-bl .card { border: 2px solid var(--text); background: var(--color-bg); box-shadow: var(--shadow-lg); }
+.panel-title { font-size: 1.15rem; font-weight: 800; color: var(--text); margin: 0 0 4px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.event-banner-image { background: var(--color-navy); border-bottom: 2px solid var(--text); }
+.event-banner h1 { font-size: 19px; font-weight: 800; }
+.event-banner-footer, .event-banner-options { border-top: 2px solid var(--text); }
+.event-banner-demo { color: var(--color-accent); border-color: var(--color-accent); border-radius: 0; }
+.event-banner-live i { border-radius: 0; width: 8px; height: 8px; }
+.event-banner-live i.online { background: var(--color-accent); box-shadow: none; }
+.event-banner-crowd input { accent-color: var(--color-accent); }
+.tooltip { background: var(--color-bg); border: 2px solid var(--text); border-radius: 0; font-size: 12px; box-shadow: var(--shadow-lg); }
+.zone-chip { border-radius: 0; width: 8px; height: 8px; }
+.legend-dot { border-radius: 0; }
+.help-pop { border: 2px solid var(--text); }
+.help-keys { display: grid; grid-template-columns: 72px 1fr; gap: 6px 10px; margin: 8px 0 12px; font-size: 13px; }
+.help-keys dt { font-weight: 700; } .help-keys dd { margin: 0; }
+.hud-bl .btn-icon { width: 22px; height: 22px; padding: 0; font-size: 12px; font-weight: 800; background: var(--color-bg); border-color: var(--color-neutral-500); }
+.preview-tag { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--text-dim); }
+.badge.preview { background: var(--color-accent-100); color: var(--color-accent-800); border-color: transparent; letter-spacing: .02em; text-transform: none; font-size: 11px; }
+.seat-blocked { margin: 10px 0 0; padding: 12px 14px; border: 2px solid var(--color-neutral-500); font-size: 14px; font-weight: 600; }
+.pov-nav { gap: 4px; }
+.pov-nav button { border: 2px solid var(--text); justify-content: flex-start; gap: 4px; padding: 8px 10px; font-size: 13px; }
+.pov-nav button:hover:not(:disabled) { background: var(--color-accent-100); border-color: var(--text); }
+.pov-nav .btn-ghost { border-color: transparent; color: var(--color-accent); }
+.seat-row { border-bottom-color: var(--color-divider); font-size: 13px; }
+.seat-row .btn-ghost { color: var(--text); }
+.total { font-weight: 800; }
+.look-hint, .toast { border: 2px solid var(--text); font-weight: 600; }
+
 /* Página de eventos (rediseño v3) */
 .events-page { flex: 1; padding-top: var(--topbar-h); }
 .btn-xl { padding: 14px 18px; font-size: 15px; min-width: 230px; justify-content: space-between; }

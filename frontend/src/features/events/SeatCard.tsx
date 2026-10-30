@@ -11,6 +11,7 @@ import { neighborSeat, type Direction } from '../../scene/seatNavigation';
 import {PreviewCard,PreviewNavigation} from './PreviewCard';
 import {nearestInDirection} from '../../scene/previewNavigation';
 import {eventTargetXZ} from '../../scene/eventTarget';
+import { Icon } from '../../components/Icon';
 
 interface Props {
   event: EventDetail; idx: number; busy: boolean;
@@ -41,13 +42,13 @@ export function SeatCard({ event, idx, busy, onReserve, onRelease, onMove, onExi
   const mixed=!!event.venue.layout.admission,concert=!!event.venue.layout.concert;
   const attrs = mixed ? [{icon:'front' as const,text:concert?'Vista hacia el escenario':'Vista hacia la cancha'},{icon:'center' as const,text:'Lugar numerado'}] : seatAttributes(data, idx, event.venue.layout, q);
   const mine = selected.includes(idx) || (status[idx] === 1 && lockedBy.get(idx) === user?.id);
-  const reason = status[idx] === 2 ? 'Este asiento ya fue vendido' : status[idx] === 1 && !mine ? 'Otra persona lo está comprando ahora' : null;
+  const reason = status[idx] === 2 ? 'Vendido. Prueba el de al lado con las flechas.' : status[idx] === 1 && !mine ? 'Otra persona lo está pagando ahora. Si no completa, se libera en minutos.' : null;
   const can = (d: Direction) => concert ? nearestInDirection(
     [data.positions[idx*3],data.positions[idx*3+2]],
     Array.from({length:data.count},(_,i)=>({id:i,x:data.positions[i*3],z:data.positions[i*3+2]})).filter(p=>p.id!==idx&&data.zoneIdx[p.id]===data.zoneIdx[idx]&&data.rows[p.id]!=='GA'),d,eventTargetXZ(event.venue.layout)
   ) : neighborSeat(data, idx, d);
   const neighbors={left:can('left'),right:can('right'),front:can('front'),back:can('back')};
-  const ringColor = q.percentile >= 75 ? '#3ecf8e' : q.percentile >= 55 ? '#ffb020' : '#ff7a45';
+  const ringColor = q.percentile >= 75 ? '#ffd60a' : q.percentile >= 55 ? '#ffe98a' : '#a5a499';
   const pct = (v: number) => `${Math.round(v * 100)}%`;
   const breakdown = `Cercanía al campo ${pct(q.D)} (${Math.round(q.distance)} m al centro) · Alineación con el eje ${pct(q.A)} (θ ${Math.round(q.angleDeg)}°) · Ángulo de visión ${pct(q.E)} (${q.elevationDeg.toFixed(1)}° de elevación)`;
 
@@ -70,10 +71,10 @@ export function SeatCard({ event, idx, busy, onReserve, onRelease, onMove, onExi
         <button className="btn-lg" disabled={busy} onClick={() => onRelease(idx)}>Quitar de mi reserva</button>
       ) : (
         <button className="btn-primary btn-lg" disabled={busy || !!reason} title={reason ?? undefined} onClick={() => onReserve(idx)}>
-          {busy ? 'Apartando…' : 'Apartar este asiento'}
+          <span>{busy ? 'Apartando…' : 'Apartar este asiento'}</span><Icon name="arrow" />
         </button>
       )}
-      {reason && <p className="notice" style={{ margin: '0.4rem 0 0', textAlign: 'center' }}>{reason}</p>}
+      {reason && <p className="seat-blocked" role="status">{reason}</p>}
       <PreviewNavigation canMove={d=>neighbors[d]!==null} onMove={d=>{const n=neighbors[d];if(n!==null)onMove(n);}} onExit={onExit}/>
     </PreviewCard>
   );
