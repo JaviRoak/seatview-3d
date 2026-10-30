@@ -2,6 +2,7 @@
  * Endpoints de bloqueo temporal (issue #8). Todos requieren JWT.
  *  POST   /api/locks          { eventId, eventSeatId } → 201 | 409 SEAT_TAKEN | 409 LOCK_LIMIT | 409 SEAT_SOLD
  *  DELETE /api/locks          { eventId, eventSeatId } → 200 (solo el dueño)
+ *  POST   /api/locks/zone     { eventId, zoneId, quantity } → 201 | 409 ZONE_FULL | 409 LOCK_LIMIT (zonas sin asiento)
  *  POST   /api/locks/extend   { eventId, eventSeatId } → 200 | 409 LOCK_LOST
  *  GET    /api/locks/:eventId → mis bloqueos vivos con TTL
  */
@@ -13,10 +14,16 @@ import { lockService } from './locks.service';
 import { prisma } from '../../lib/prisma';
 import { badRequest, conflict, notFound } from '../../lib/errors';
 import { emitSeatUpdate } from '../../sockets';
+import { reserveZone } from './zone-reservation';
 
 export const locksRouter = Router();
 locksRouter.use(requireAuth);
 const body = z.object({ eventId: z.string().min(1), eventSeatId: z.string().min(1) });
+const zoneBody = z.object({ eventId: z.string().min(1), zoneId: z.string().min(1), quantity: z.number().int().min(1).max(10) });
+
+locksRouter.post('/zone', validate('body', zoneBody), async (req, res, next) => {
+  try { res.status(201).json(await reserveZone(req.body.eventId, req.body.zoneId, req.body.quantity, req.user!.id)); } catch (e) { next(e); }
+});
 
 locksRouter.post('/', validate('body', body), async (req, res, next) => {
   try {

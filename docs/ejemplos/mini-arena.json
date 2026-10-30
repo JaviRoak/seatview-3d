@@ -1,0 +1,40 @@
+{
+  "venue": { "name": "Mini Arena de Prueba", "city": "San Salvador", "description": "Ejemplo pequeño de la Ruta B: dos zonas con asientos explícitos." },
+  "layout": {
+    "field": { "width": 28, "depth": 15 },
+    "corner": 0.3, "seatPitch": 0.8, "aisleAngle": 0.2,
+    "stands": ["Este", "Norte", "Oeste", "Sur"],
+    "levels": [{ "name": "Nivel 1", "rows": 3, "rowDepth": 0.85, "rowRise": 0.5, "baseHeight": 1.0, "baseOffset": 2.0 }]
+  },
+  "zones": [
+    { "key": "norte", "name": "Tribuna Norte · Nivel 1", "color": "#9db59a", "price": 30 },
+    { "key": "sur", "name": "Tribuna Sur · Nivel 1", "color": "#c2b18f", "price": 20 }
+  ],
+  "seats": [
+    { "zone": "norte", "row": "A", "number": 1, "x": -4.0, "y": 1.0, "z": -10.0 },
+    { "zone": "norte", "row": "A", "number": 2, "x": -3.2, "y": 1.0, "z": -10.0 },
+    { "zone": "norte", "row": "A", "number": 3, "x": -2.4, "y": 1.0, "z": -10.0 },
+    { "zone": "norte", "row": "A", "number": 4, "x": -1.6, "y": 1.0, "z": -10.0 },
+    { "zone": "norte", "row": "A", "number": 5, "x": -0.8, "y": 1.0, "z": -10.0 },
+    { "zone": "norte", "row": "A", "number": 6, "x": 0.0, "y": 1.0, "z": -10.0 },
+    { "zone": "norte", "row": "A", "number": 7, "x": 0.8, "y": 1.0, "z": -10.0 },
+    { "zone": "norte", "row": "A", "number": 8, "x": 1.6, "y": 1.0, "z": -10.0 },
+    { "zone": "norte", "row": "B", "number": 1, "x": -4.0, "y": 1.5, "z": -10.85 },
+    { "zone": "norte", "row": "B", "number": 2, "x": -3.2, "y": 1.5, "z": -10.85 },
+    { "zone": "norte", "row": "B", "number": 3, "x": -2.4, "y": 1.5, "z": -10.85 },
+    { "zone": "norte", "row": "B", "number": 4, "x": -1.6, "y": 1.5, "z": -10.85 },
+    { "zone": "norte", "row": "B", "number": 5, "x": -0.8, "y": 1.5, "z": -10.85 },
+    { "zone": "norte", "row": "B", "number": 6, "x": 0.0, "y": 1.5, "z": -10.85 },
+    { "zone": "norte", "row": "B", "number": 7, "x": 0.8, "y": 1.5, "z": -10.85 },
+    { "zone": "norte", "row": "B", "number": 8, "x": 1.6, "y": 1.5, "z": -10.85 },
+    { "zone": "sur", "row": "A", "number": 1, "x": -2.4, "y": 1.0, "z": 10.0 },
+    { "zone": "sur", "row": "A", "number": 2, "x": -1.6, "y": 1.0, "z": 10.0 },
+    { "zone": "sur", "row": "A", "number": 3, "x": -0.8, "y": 1.0, "z": 10.0 },
+    { "zone": "sur", "row": "A", "number": 4, "x": 0.0, "y": 1.0, "z": 10.0 },
+    { "zone": "sur", "row": "A", "number": 5, "x": 0.8, "y": 1.0, "z": 10.0 },
+    { "zone": "sur", "row": "A", "number": 6, "x": 1.6, "y": 1.0, "z": 10.0 }
+  ],
+  "events": [
+    { "name": "Exhibición de Prueba", "date": "2026-12-01T19:00", "category": "OTRO", "description": "Evento de ejemplo del importador." }
+  ]
+}
