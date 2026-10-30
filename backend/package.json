@@ -16,7 +16,9 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:reset": "prisma migrate reset --force"
+    "db:reset": "prisma migrate reset --force",
+    "venue:import": "tsx scripts/venue-import.ts",
+    "venue:event": "tsx scripts/venue-event.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
