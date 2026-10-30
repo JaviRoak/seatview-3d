@@ -14,9 +14,10 @@ export function hueFromName(name: string): number {
   return h % 360;
 }
 
+/** Las subidas viven en el backend; /models/... y las URLs absolutas se usan tal cual. */
 export function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
-  return url.startsWith('/') ? `${API_URL}${url}` : url;
+  return url.startsWith('/uploads/') ? `${API_URL}${url}` : url;
 }
 
 interface Props { name: string; category: EventCategory; coverImageUrl?: string | null; className?: string; compact?: boolean }
