@@ -19,6 +19,27 @@ import { HttpError, notFound, badRequest } from '../../lib/errors';
 
 export const adminRouter = Router();
 adminRouter.use(requireAuth, requireRole('ADMIN'));
+// Listar usuarios registrados (solo administradores).
+adminRouter.get('/users', async (_req, res, next) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    res.json({ users });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 
