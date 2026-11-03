@@ -19,7 +19,8 @@ import { HttpError, notFound, badRequest, forbidden } from '../../lib/errors';
 
 export const adminRouter = Router();
 adminRouter.use(requireAuth, requireRole('ADMIN'));
-// Listar usuarios registrados (solo administradores).
+
+ // Listar usuarios registrados (solo administradores).
 adminRouter.get('/users', async (_req, res, next) => {
   try {
     const users = await prisma.user.findMany({
@@ -35,11 +36,18 @@ adminRouter.get('/users', async (_req, res, next) => {
       },
     });
 
-    // Cambiar el rol de un usuario (solo administradores).
+    res.json({ users });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Validación para cambiar el rol de un usuario.
 const updateUserRoleSchema = z.object({
   role: z.enum(['USER', 'ADMIN']),
 });
 
+// Cambiar el rol de un usuario (solo administradores).
 adminRouter.patch(
   '/users/:id/role',
   validate('body', updateUserRoleSchema),
@@ -80,11 +88,6 @@ adminRouter.patch(
   }
 );
 
-    res.json({ users });
-  } catch (error) {
-    next(error);
-  }
-});
 
 export const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 
