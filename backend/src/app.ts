@@ -12,6 +12,7 @@ import { ticketsRouter } from './modules/tickets/tickets.routes';
 import { adminRouter } from './modules/admin/admin.routes';
 import { UPLOADS_DIR } from './lib/storage';
 import { errorHandler } from './middleware/errorHandler';
+import { supportRouter } from './modules/support/support.routes';
 
 export function createApp() {
   const app = express();
@@ -27,6 +28,7 @@ export function createApp() {
   app.use('/api/payments', paymentsRouter);
   app.use('/api/tickets', ticketsRouter);
   app.use('/api/admin', adminRouter);
+  app.use('/api/support', supportRouter);
   app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '7d', index: false }));
 
   app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada', code: 'NOT_FOUND' }));
