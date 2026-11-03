@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyToken, type AuthUser } from '../modules/auth/auth.service';
 import { forbidden, unauthorized } from '../lib/errors';
+import { prisma } from '../lib/prisma';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -23,9 +24,22 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
 }
 
 export function requireRole(role: 'ADMIN') {
-  return (req: Request, _res: Response, next: NextFunction) => {
-    if (!req.user) return next(unauthorized());
-    if (req.user.role !== role) return next(forbidden());
-    next();
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) return next(unauthorized());
+
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { role: true },
+      });
+
+      if (!user || user.role !== role) {
+        return next(forbidden());
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
 }
