@@ -15,7 +15,7 @@ import { prisma } from '../../lib/prisma';
 import { env } from '../../config/env';
 import { storage } from '../../lib/storage';
 import { sniffImage, sanitizeFilename } from '../../lib/imageSniff';
-import { HttpError, notFound, badRequest } from '../../lib/errors';
+import { HttpError, notFound, badRequest, forbidden } from '../../lib/errors';
 
 export const adminRouter = Router();
 adminRouter.use(requireAuth, requireRole('ADMIN'));
@@ -34,6 +34,51 @@ adminRouter.get('/users', async (_req, res, next) => {
         createdAt: 'desc',
       },
     });
+
+    // Cambiar el rol de un usuario (solo administradores).
+const updateUserRoleSchema = z.object({
+  role: z.enum(['USER', 'ADMIN']),
+});
+
+adminRouter.patch(
+  '/users/:id/role',
+  validate('body', updateUserRoleSchema),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { role } = req.body as z.infer<typeof updateUserRoleSchema>;
+
+      if (req.user?.id === id) {
+        throw forbidden('No puedes modificar tu propio rol');
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+
+      if (!user) {
+        throw notFound('Usuario no encontrado');
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: { role },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+      });
+
+      res.json({ user: updatedUser });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
     res.json({ users });
   } catch (error) {
