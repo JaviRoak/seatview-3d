@@ -175,3 +175,24 @@ model Ticket {
   usedAt      DateTime?
   createdAt   DateTime  @default(now())
 }
+
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+model SupportTicket {
+  id        String              @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    SupportTicketStatus @default(OPEN)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email])
+}

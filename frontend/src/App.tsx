@@ -7,6 +7,8 @@ import { LoginPage } from './features/auth/LoginPage';
 import { CheckoutPage } from './features/checkout/CheckoutPage';
 import { TicketsPage } from './features/tickets/TicketsPage';
 import { AdminPage } from './features/admin/AdminPage';
+import { FaqPage } from './features/support/FaqPage';
+import { ContactPage } from './features/support/ContactPage';
 
 /** La vista del recinto ocupa toda la pantalla: ahí no va el pie de página. */
 function PageFooter() {
@@ -25,6 +27,8 @@ export default function App() {
         <Route path="/boletos" element={<TicketsPage />} />
         <Route path="/ingresar" element={<LoginPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/preguntas-frecuentes" element={<FaqPage />} />
+        <Route path="/contacto" element={<ContactPage />} />
       </Routes>
       <PageFooter />
     </BrowserRouter>

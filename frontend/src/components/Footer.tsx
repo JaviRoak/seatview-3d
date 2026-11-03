@@ -21,7 +21,7 @@ export function Footer() {
         </nav>
         <nav aria-label="Ayuda">
           <h6>Ayuda</h6>
-          <a href="#">Preguntas frecuentes</a><a href="#">Reembolsos</a><a href="#">Contacto</a>
+          <Link to="/preguntas-frecuentes">Preguntas frecuentes</Link><a href="#">Reembolsos</a><Link to="/contacto">Contacto</Link>
         </nav>
         <nav aria-label="Organizadores">
           <h6>Organizadores</h6>
