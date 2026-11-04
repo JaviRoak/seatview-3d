@@ -1,0 +1,221 @@
+{
+  "info": {
+    "_postman_id": "ff599dac-5abf-5bfd-aa4f-f7fb7e7ab125",
+    "name": "SeatView 3D | 03 - Eventos públicos",
+    "description": "Colección modular importable en Postman. Parte 3/8. Configurar variables de colección según entorno; las variables de una colección no se sincronizan automáticamente con otras.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "03 - Eventos públicos",
+      "item": [
+        {
+          "name": "GET Listar eventos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const d=pm.response.json();",
+                  "  pm.test(\"Lista de eventos\",()=>pm.expect(d.events).to.be.an(\"array\"));",
+                  "  if (d.events.length) pm.collectionVariables.set(\"eventId\",d.events[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Detalle de evento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const d=pm.response.json();",
+                  "  pm.test(\"Evento presente\",()=>pm.expect(d.event.id).to.exist);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Asientos del evento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/seats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "seats"
+              ]
+            },
+            "description": "Captura un asiento numerado disponible y una zona de admisión general, si existen.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const d=pm.response.json();",
+                  "  pm.test(\"IDs y estados paralelos\",()=>pm.expect(d.ids.length).to.eql(d.status.length));",
+                  "  const i=d.ids.findIndex((id,n)=>d.status[n]===0 && d.rows[n]!==\"GA\");",
+                  "  if (i>=0) pm.collectionVariables.set(\"eventSeatId\",d.ids[i]);",
+                  "  const z=d.zones.find(x=>x.generalAdmission);",
+                  "  if (z) pm.collectionVariables.set(\"zoneId\",z.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "andres.berrios@seatview.test",
+      "type": "string"
+    },
+    {
+      "key": "userPassword",
+      "value": "Andres12345!",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "javier.polanco@seatview.test",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Javier12345!",
+      "type": "string"
+    },
+    {
+      "key": "registerEmail",
+      "value": "pruebas.postman@example.test",
+      "type": "string"
+    },
+    {
+      "key": "registerPassword",
+      "value": "Pruebas12345!",
+      "type": "string"
+    },
+    {
+      "key": "registerName",
+      "value": "Usuario Pruebas",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventSeatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "zoneId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assetId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "coverImageUrl",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

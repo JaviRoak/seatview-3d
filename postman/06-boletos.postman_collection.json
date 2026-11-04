@@ -1,0 +1,241 @@
+{
+  "info": {
+    "_postman_id": "d249bbb2-444e-5ab3-ac80-275b8ea1ad2b",
+    "name": "SeatView 3D | 06 - Boletos",
+    "description": "Colección modular importable en Postman. Parte 6/8. Configurar variables de colección según entorno; las variables de una colección no se sincronizan automáticamente con otras.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "06 - Boletos",
+      "item": [
+        {
+          "name": "GET Mis boletos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "mine"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const d=pm.response.json();",
+                  "  pm.test(\"Tickets es arreglo\",()=>pm.expect(d.tickets).to.be.an(\"array\"));",
+                  "  if (d.tickets.length) {pm.collectionVariables.set(\"ticketId\",d.tickets[0].id);pm.collectionVariables.set(\"ticketCode\",d.tickets[0].code);}",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Detalle boleto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{ticketId}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Verificar QR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "verify"
+              ]
+            },
+            "description": "En este backend la verificación es pública y no consume ni marca el boleto como usado.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{ticketCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const d=pm.response.json();",
+                  "  pm.test(\"Código válido\",()=>pm.expect(d.valid).to.eql(true));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "andres.berrios@seatview.test",
+      "type": "string"
+    },
+    {
+      "key": "userPassword",
+      "value": "Andres12345!",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "javier.polanco@seatview.test",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Javier12345!",
+      "type": "string"
+    },
+    {
+      "key": "registerEmail",
+      "value": "pruebas.postman@example.test",
+      "type": "string"
+    },
+    {
+      "key": "registerPassword",
+      "value": "Pruebas12345!",
+      "type": "string"
+    },
+    {
+      "key": "registerName",
+      "value": "Usuario Pruebas",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventSeatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "zoneId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assetId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "coverImageUrl",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

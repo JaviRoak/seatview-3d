@@ -1,0 +1,296 @@
+{
+  "info": {
+    "_postman_id": "ea9eb089-4680-5c48-9f53-33bb0f0160e8",
+    "name": "SeatView 3D | 07 - Administración (JWT ADMIN)",
+    "description": "Colección modular importable en Postman. Parte 7/8. Configurar variables de colección según entorno; las variables de una colección no se sincronizan automáticamente con otras.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "07 - Administración (JWT ADMIN)",
+      "item": [
+        {
+          "name": "GET Eventos admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "events"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Subir imagen (seleccionar archivo)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/uploads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "uploads"
+              ]
+            },
+            "description": "En Postman, Body > form-data > file: elegir un JPG, PNG o WebP menor al límite configurado. No se adjunta archivo en exportación.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const d=pm.response.json();",
+                  "  if (d.asset) {pm.collectionVariables.set(\"assetId\",d.asset.id);pm.collectionVariables.set(\"coverImageUrl\",d.asset.url);}",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH Evento admin",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "events",
+                "{{eventId}}"
+              ]
+            },
+            "description": "Modifica la categoría del evento. Puede incluir coverImageUrl si se subió una imagen.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"CONCIERTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Imagen [ELIMINA ARCHIVO]",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/uploads/{{assetId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "uploads",
+                "{{assetId}}"
+              ]
+            },
+            "description": "Elimina permanentemente la imagen subida y sus asignaciones; ejecutar al final.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta JSON\", () => { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "andres.berrios@seatview.test",
+      "type": "string"
+    },
+    {
+      "key": "userPassword",
+      "value": "Andres12345!",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "javier.polanco@seatview.test",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Javier12345!",
+      "type": "string"
+    },
+    {
+      "key": "registerEmail",
+      "value": "pruebas.postman@example.test",
+      "type": "string"
+    },
+    {
+      "key": "registerPassword",
+      "value": "Pruebas12345!",
+      "type": "string"
+    },
+    {
+      "key": "registerName",
+      "value": "Usuario Pruebas",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventSeatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "zoneId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assetId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "coverImageUrl",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
