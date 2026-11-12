@@ -1,5 +1,6 @@
 
 import { Link } from 'react-router-dom';
+import { usePageMeta } from '../../seo/meta';
 
 const questions = [
   {
@@ -30,6 +31,7 @@ const questions = [
 ];
 
 export function FaqPage() {
+  usePageMeta({ title: 'Preguntas frecuentes', description: 'Resuelve tus dudas sobre la compra de boletos en SeatView 3D: vista previa 3D del asiento, reserva temporal, pago y boletos con código QR.' });
   return (
     <main style={{ maxWidth: 850, margin: '0 auto', padding: '48px 24px' }}>
       <h1>Preguntas frecuentes</h1>

@@ -10,6 +10,7 @@ import type { EventCategory, EventSummary } from '../../api/types';
 import { EventCover } from '../../components/EventCover';
 import { Icon } from '../../components/Icon';
 import { Billboard } from './Billboard';
+import { usePageMeta } from '../../seo/meta';
 
 const AUTOPLAY_MS = 6000;
 export const CATEGORY_PLURAL: Record<EventCategory, string> = { FUTBOL: 'Deportes', CONCIERTO: 'Conciertos', OTRO: 'Otros' };
@@ -46,6 +47,7 @@ export function groupByMonth(events: EventSummary[]) {
 }
 
 export function EventsPage() {
+  usePageMeta({ description: 'Cartelera de conciertos y partidos en El Salvador. Elige tu asiento, mira en 3D cómo se verá el evento y compra tu boleto en línea.' });
   const [events, setEvents] = useState<EventSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [params, setParams] = useSearchParams();
