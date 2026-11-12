@@ -5,6 +5,7 @@ import { ticketsApi } from '../../api';
 import type { Ticket } from '../../api/types';
 import { useAuthStore } from '../../store/auth';
 import { TicketCard } from '../../components/TicketCard';
+import { usePageMeta } from '../../seo/meta';
 
 /** Compone un PNG del boleto (datos + QR) en un canvas y lo descarga. */
 export async function downloadTicketPng(t: Ticket) {
@@ -26,6 +27,7 @@ export async function downloadTicketPng(t: Ticket) {
 }
 
 export function TicketsPage() {
+  usePageMeta({ title: 'Mis boletos', noindex: true });
   const user = useAuthStore((s) => s.user);
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [error, setError] = useState<string | null>(null);

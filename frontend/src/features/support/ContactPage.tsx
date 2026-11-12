@@ -1,6 +1,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { api } from '../../api/client';
+import { usePageMeta } from '../../seo/meta';
 
 type ContactForm = {
   name: string;
@@ -17,6 +18,7 @@ const initialForm: ContactForm = {
 };
 
 export function ContactPage() {
+  usePageMeta({ title: 'Contacto', description: 'Escríbele al equipo de SeatView 3D: dudas sobre tu compra, tus boletos o cómo publicar tu evento con vista previa 3D de asientos.' });
   const [form, setForm] = useState<ContactForm>(initialForm);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');

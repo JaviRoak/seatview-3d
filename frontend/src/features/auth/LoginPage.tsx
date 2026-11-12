@@ -10,6 +10,7 @@ import { authApi, eventsApi } from '../../api';
 import { resolveImageUrl } from '../../components/EventCover';
 import { Icon } from '../../components/Icon';
 import { useAuthStore } from '../../store/auth';
+import { usePageMeta } from '../../seo/meta';
 
 // Cuentas que crea el seed (backend/prisma/seed.ts).
 const DEMO_USERS = [
@@ -31,6 +32,7 @@ export function authErrors(mode: 'login' | 'register', f: { name: string; email:
 }
 
 export function LoginPage() {
+  usePageMeta({ title: 'Ingresar', noindex: true });
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [showPw, setShowPw] = useState(false);
