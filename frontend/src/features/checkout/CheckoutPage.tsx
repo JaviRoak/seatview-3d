@@ -17,6 +17,7 @@ import { TicketCard } from '../../components/TicketCard';
 import { Icon } from '../../components/Icon';
 import { clock } from '../../components/TopBar';
 import { eventDate, money } from '../events/EventsPage';
+import { usePageMeta } from '../../seo/meta';
 
 const LOCK_MS = 5 * 60_000;
 const CARD_OK = '4242 4242 4242 4242', CARD_DECLINED = '4000 0000 0000 0002';
@@ -57,6 +58,7 @@ type Result = { orderId: string; total: number; tickets: Array<{ id: string; qrD
 
 export function CheckoutPage() {
   const { eventId } = useParams<{ eventId: string }>();
+  usePageMeta({ title: 'Pago', noindex: true });
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const data = useSeatsStore((s) => s.data);
