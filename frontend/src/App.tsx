@@ -9,6 +9,7 @@ import { TicketsPage } from './features/tickets/TicketsPage';
 import { AdminPage } from './features/admin/AdminPage';
 import { FaqPage } from './features/support/FaqPage';
 import { ContactPage } from './features/support/ContactPage';
+import { NotFoundPage } from './features/errors/NotFoundPage';
 
 /** La vista del recinto ocupa toda la pantalla: ahí no va el pie de página. */
 function PageFooter() {
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/preguntas-frecuentes" element={<FaqPage />} />
         <Route path="/contacto" element={<ContactPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <PageFooter />
     </BrowserRouter>

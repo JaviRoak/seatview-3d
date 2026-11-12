@@ -10,8 +10,10 @@ import { useAuthStore } from '../../store/auth';
 import { EventCover } from '../../components/EventCover';
 import { CATEGORY_LABEL } from '../../components/EventInfoCard';
 import { UploadDrop } from './UploadDrop';
+import { usePageMeta } from '../../seo/meta';
 
 export function AdminPage() {
+  usePageMeta({ title: 'Administración', noindex: true });
   const user = useAuthStore((s) => s.user);
   const [events, setEvents] = useState<AdminEvent[] | null>(null);
   const [error, setError] = useState<string | null>(null);
