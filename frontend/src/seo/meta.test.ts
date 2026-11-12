@@ -58,3 +58,12 @@ describe('SEO: metadatos por página', () => {
     expect(document.getElementById('seo-jsonld')).toBeNull();
   });
 });
+
+describe('SEO: preguntas frecuentes', () => {
+  it('genera schema.org/FAQPage con todas las preguntas', async () => {
+    const { faqJsonLd } = await import('../features/support/FaqPage');
+    expect(faqJsonLd['@type']).toBe('FAQPage');
+    expect(faqJsonLd.mainEntity.length).toBeGreaterThan(0);
+    expect(faqJsonLd.mainEntity[0]).toMatchObject({ '@type': 'Question', acceptedAnswer: { '@type': 'Answer' } });
+  });
+});

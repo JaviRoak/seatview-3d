@@ -30,8 +30,19 @@ const questions = [
   },
 ];
 
+/** schema.org/FAQPage: Google puede mostrar estas preguntas directamente en los resultados. */
+export const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: questions.map((q) => ({
+    '@type': 'Question',
+    name: q.question,
+    acceptedAnswer: { '@type': 'Answer', text: q.answer },
+  })),
+};
+
 export function FaqPage() {
-  usePageMeta({ title: 'Preguntas frecuentes', description: 'Resuelve tus dudas sobre la compra de boletos en SeatView 3D: vista previa 3D del asiento, reserva temporal, pago y boletos con código QR.' });
+  usePageMeta({ title: 'Preguntas frecuentes', description: 'Resuelve tus dudas sobre la compra de boletos en SeatView 3D: vista previa 3D del asiento, reserva temporal, pago y boletos con código QR.', jsonLd: faqJsonLd });
   return (
     <main style={{ maxWidth: 850, margin: '0 auto', padding: '48px 24px' }}>
       <h1>Preguntas frecuentes</h1>
