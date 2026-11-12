@@ -1,6 +1,31 @@
 /// <reference types="vitest" />
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import type { Plugin } from 'vite';
+import { buildRobots, buildSitemap, fetchSitemapEvents, resolveSiteUrl } from './src/seo/sitemap';
+
+/**
+ * SEO (Sprint 4): al compilar emite robots.txt y sitemap.xml en dist/.
+ * - URL del sitio: VITE_SITE_URL o, en Vercel, el dominio de producción.
+ * - Eventos: se piden a VITE_API_URL/api/events; si no responde, se usan los del seed.
+ */
+function seoFiles(env: Record<string, string>): Plugin {
+  return {
+    name: 'seatview-seo-files',
+    apply: 'build',
+    async generateBundle() {
+      const siteUrl = resolveSiteUrl({ ...process.env, ...env });
+      this.emitFile({ type: 'asset', fileName: 'robots.txt', source: buildRobots(siteUrl) });
+      if (!siteUrl) {
+        this.warn('VITE_SITE_URL no está definida: se omite sitemap.xml (necesita URLs absolutas).');
+        return;
+      }
+      const { events, source } = await fetchSitemapEvents(env.VITE_API_URL ?? '');
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: buildSitemap(siteUrl, events) });
+      console.log(`[seo] sitemap.xml: ${events.length} eventos (${source}) en ${siteUrl}`);
+    },
+  };
+}
 
 /**
  * Configuración de Vite.
@@ -14,7 +39,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const backend = env.BACKEND_ORIGIN || 'http://127.0.0.1:4000';
   return {
-    plugins: [react()],
+    plugins: [react(), seoFiles(env)],
     server: {
       port: 5173,
       host: true,
